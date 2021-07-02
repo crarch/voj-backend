@@ -3,6 +3,7 @@ use actix_web::{middleware::Logger,App,HttpServer,web};
 use crate::database::get_database_pool;
 
 use crate::routes::routing;
+use crate::env::get_env;
 
 pub async fn server()->std::io::Result<()>{
     
@@ -10,13 +11,15 @@ pub async fn server()->std::io::Result<()>{
     
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
     
+    let listen:String=get_env("LISTEN_IP")+":"+&(get_env("LISTEN_PORT"));
+    
     HttpServer::new(move||{
         App::new()
             .data(database_pool.clone())
             .configure(routing)
             .wrap(Logger::new("%a \"%r\" %s"))
     })
-        .bind("0.0.0.0:8080")?
+        .bind(&listen[..])?
         .run()
         .await
 }

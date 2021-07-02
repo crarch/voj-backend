@@ -13,11 +13,6 @@ pub struct User{
     pub ban_judge:bool,
 }
 
-#[derive(Debug,Serialize,Deserialize)]
-pub struct UserAuthJson{
-    pub user_email:String,
-    pub user_password:String,
-}
 
 
 impl User{

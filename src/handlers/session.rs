@@ -1,8 +1,13 @@
 use actix_web::{web,HttpResponse,post,Responder,Error,get,delete};
 use anyhow::Result;
 
+use serde::{Deserialize, Serialize};
+
 use crate::Pool;
-use crate::models::user::{User,UserAuthJson};
+use crate::models::user::User;
+use crate::utils::auth::UserAuthJson;
+use crate::env::get_env;
+
 
 
 #[post("/session")]
@@ -11,10 +16,8 @@ pub async fn get_jwt_token(
     user_auth_json:web::Json<UserAuthJson>
 )->Result<HttpResponse,Error>{
     
-    println!("{:?}",user_auth_json);
-        
-                
     Ok(HttpResponse::Ok().body("ok"))
 }
+
 
 
