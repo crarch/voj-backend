@@ -23,6 +23,7 @@ pub async fn server()->std::io::Result<()>{
     HttpServer::new(move||{
         App::new()
             .wrap_fn(|req,srv|{
+                
                 let mut authorized=false;
                 if let Some(authorization)=req.headers().get("Authorization"){
                     if let Ok(token)=authorization.to_str(){

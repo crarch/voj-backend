@@ -8,12 +8,7 @@ use anyhow::Result;
 use crate::models::UserId;
 
 
-
-
-
-
 #[get("/version")]
-pub async fn get_version(user_id:UserId)->Result<HttpResponse,Error>{
-    println!("{}",user_id.user_id.to_string());
+pub async fn get_version()->Result<HttpResponse,Error>{
     Ok(HttpResponse::Ok().body(format!("{{\"version\":\"{}\"}}",env::VERSION)))
 }

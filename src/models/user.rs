@@ -35,9 +35,8 @@ impl User{
     }
     
     
-    
     pub fn get_user_by_id(
-        pool:web::Data<Pool>,
+        pool:Pool,
         user_id:u32,
     )->Result<User,()>{
         let mut client=pool.get().unwrap();
@@ -64,6 +63,32 @@ impl User{
             Err(_)=>Err(()),
         }
     }
+    
 }
     
+pub fn get_user_password_by_email(
+    pool:Pool,
+    user_email:&str,
+)->Result<(u32,String),()>{
+    let mut client=pool.get().unwrap();
+    let result=client.query(
+        "select user_id,user_password
+         from users where user_email=$1",&[&user_email.to_string()]);
+    match result{
+        Ok(rows)=>{
+            match(rows.len()){
+                1=>{
+                    let row=rows.get(0).unwrap();
+                    let user_id:i32=row.get(0);
+                    let user_id:u32=user_id as u32;
+                    let user_password:String=row.get(1);
+                    Ok((user_id,user_password))
+                    
+                },
+                _=>Err(()),
+            }
+        }
+        Err(_)=>Err(()),
+    }
+}
 

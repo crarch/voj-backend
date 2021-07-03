@@ -11,6 +11,7 @@ use crate::handlers::session::*;
 pub fn routing(cfg:&mut web::ServiceConfig){
     cfg
         .service(get_jwt_token)
+        .service(refresh_jwt_token)
         .service(get_version);
 }
             
