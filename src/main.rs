@@ -1,5 +1,4 @@
-#![allow(unused_parens)]
-
+#![allow(unused_parens,dead_code)]
 extern crate log;
 extern crate env_logger;
 
