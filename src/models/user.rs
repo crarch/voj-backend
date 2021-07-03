@@ -5,7 +5,7 @@ use actix_web::web;
 
 #[derive(Debug,Serialize,Deserialize)]
 pub struct User{
-    pub user_id:i32,
+    pub user_id:u32,
     pub user_name:String,
     pub user_email:String,
     pub user_password:String,
@@ -13,11 +13,9 @@ pub struct User{
     pub ban_judge:bool,
 }
 
-
-
 impl User{
     pub fn new(
-        user_id:i32,
+        user_id:u32,
         user_name:String,
         user_email:String,
         user_password:String,
@@ -40,7 +38,7 @@ impl User{
     
     pub fn get_user_by_id(
         pool:web::Data<Pool>,
-        user_id:i32,
+        user_id:u32,
     )->Result<User,()>{
         let mut client=pool.get().unwrap();
         let result=client.query(
