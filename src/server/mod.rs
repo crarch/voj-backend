@@ -1,8 +1,8 @@
-use actix_web::{middleware::Logger,App,HttpServer,web,HttpResponse};
+use actix_web::{middleware::Logger,App,HttpServer,HttpResponse};
 use actix_web::dev::Service;
-use actix_web::{HttpMessage,HttpRequest};
-use futures::future::FutureExt;
-use futures_util::future::{ok, err, Ready};
+use actix_web::{HttpMessage};
+
+
 
 use crate::utils::jwt::validate_jwt;
 use crate::database::get_database_pool;
@@ -22,7 +22,7 @@ pub async fn server()->std::io::Result<()>{
     
     HttpServer::new(move||{
         App::new()
-            .wrap_fn(|mut req,srv|{
+            .wrap_fn(|req,srv|{
                 let mut authorized=false;
                 if let Some(authorization)=req.headers().get("Authorization"){
                     if let Ok(token)=authorization.to_str(){
