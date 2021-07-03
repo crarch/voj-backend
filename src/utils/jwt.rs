@@ -1,8 +1,8 @@
 use serde::{Deserialize, Serialize};
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::time::{SystemTime, UNIX_EPOCH};
 
-use jsonwebtoken::errors::Error;
-use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation,TokenData};
+
+use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation,TokenData};
 
 use crate::env::get_env;
 

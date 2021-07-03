@@ -12,7 +12,7 @@ impl FromRequest for UserId {
     type Config = ();
 
 
-    fn from_request(req: &HttpRequest, payload: &mut Payload) -> Self::Future {
+    fn from_request(req: &HttpRequest, _payload: &mut Payload) -> Self::Future {
         match req.extensions().get::<UserId>() {
             Some(user) =>{
                 let new_user_id=UserId{user_id:user.user_id};

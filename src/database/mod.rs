@@ -1,4 +1,4 @@
-use std::thread;
+
 use r2d2;
 use r2d2_postgres::{postgres::NoTls, PostgresConnectionManager};
 

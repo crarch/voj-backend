@@ -7,10 +7,10 @@ use anyhow::Result;
 
 use crate::models::UserId;
 
-use crate::Pool;
-use crate::models::user::User;
 
-use crate::utils::jwt::sign_jwt;
+
+
+
 
 #[get("/version")]
 pub async fn get_version(user_id:UserId)->Result<HttpResponse,Error>{
