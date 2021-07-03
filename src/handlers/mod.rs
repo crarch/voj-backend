@@ -5,7 +5,7 @@ use crate::env;
 use actix_web::{HttpResponse,Error,get};
 use anyhow::Result;
 
-use crate::models::UserId;
+
 
 
 #[get("/version")]

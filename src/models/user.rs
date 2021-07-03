@@ -1,7 +1,7 @@
 use serde::{Deserialize,Serialize};
 
 use crate::Pool;
-use actix_web::web;
+
 
 #[derive(Debug,Serialize,Deserialize)]
 pub struct User{
