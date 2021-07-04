@@ -2,10 +2,8 @@ use actix_web::{middleware::Logger,App,HttpServer,HttpResponse};
 use actix_web::dev::Service;
 use actix_web::{HttpMessage};
 
-
-
 use crate::utils::jwt::validate_jwt;
-use crate::database::get_database_pool;
+use crate::database::get_database_pg_pool;
 
 use crate::routes::routing;
 use crate::env::get_env;
@@ -13,7 +11,7 @@ use crate::models::UserId;
 
 pub async fn server()->std::io::Result<()>{
     
-    let database_pool=get_database_pool();
+    let database_pg_pool=get_database_pg_pool();
     
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
     
@@ -55,7 +53,7 @@ pub async fn server()->std::io::Result<()>{
                 }
             })
                         
-            .data(database_pool.clone())
+            .data(database_pg_pool.clone())
                 
             .configure(routing)
             .wrap(Logger::new("%a \"%r\" %s"))

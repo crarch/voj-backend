@@ -7,7 +7,7 @@ pub type Pool = web::Data<_Pool>;
 
 use crate::env::get_env;
 
-pub fn get_database_pool()->_Pool{
+pub fn get_database_pg_pool()->_Pool{
     
     dotenv::dotenv().ok();
     
@@ -27,8 +27,8 @@ pub fn get_database_pool()->_Pool{
         NoTls,
     );
     
-    let pool=r2d2::Pool::new(manager).unwrap();
+    let pg_pool=r2d2::Pool::new(manager).unwrap();
     
-    pool
+    pg_pool
 }
     

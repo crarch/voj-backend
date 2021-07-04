@@ -15,11 +15,11 @@ use crate::utils::auth::auth_user;
 
 #[post("/session")]
 pub async fn get_jwt_token(
-    pool:Pool,
+    pg_pool:Pool,
     user_auth_json:web::Json<UserAuthJson>
 )->Result<HttpResponse,Error>{
     if let Ok(user_id)=auth_user(
-        pool,
+        pg_pool,
         &user_auth_json.user_email,
         &user_auth_json.user_password
     ){
