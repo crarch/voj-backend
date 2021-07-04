@@ -9,7 +9,6 @@ mod database;
 mod utils;
 mod handlers;
 
-use crate::database::PgPool;
 use crate::database::MongoDB;
 use crate::utils::env;
 

@@ -1,9 +1,7 @@
 use actix_web::{web,HttpRequest,HttpResponse,post,Error,get};
 use anyhow::Result;
 
-
-
-use crate::PgPool;
+use crate::MongoDB;
 
 use crate::utils::auth::UserAuthJson;
 
@@ -15,11 +13,11 @@ use crate::utils::auth::auth_user;
 
 #[post("/session")]
 pub async fn get_jwt_token(
-    pg_pool:PgPool,
+    mongo:MongoDB,
     user_auth_json:web::Json<UserAuthJson>
 )->Result<HttpResponse,Error>{
     if let Ok(user_id)=auth_user(
-        pg_pool,
+        mongo,
         &user_auth_json.user_email,
         &user_auth_json.user_password
     ){
