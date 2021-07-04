@@ -3,7 +3,7 @@ use anyhow::Result;
 
 
 
-use crate::Pool;
+use crate::PgPool;
 
 use crate::utils::auth::UserAuthJson;
 
@@ -15,7 +15,7 @@ use crate::utils::auth::auth_user;
 
 #[post("/session")]
 pub async fn get_jwt_token(
-    pg_pool:Pool,
+    pg_pool:PgPool,
     user_auth_json:web::Json<UserAuthJson>
 )->Result<HttpResponse,Error>{
     if let Ok(user_id)=auth_user(

@@ -1,7 +1,7 @@
 use serde::{Deserialize,Serialize};
 
 use crate::models::user::get_user_password_by_email;
-use crate::Pool;
+use crate::PgPool;
 
 
 #[derive(Debug,Serialize,Deserialize)]
@@ -11,7 +11,7 @@ pub struct UserAuthJson{
 }
 
 pub fn auth_user(
-    pg_pool:Pool,
+    pg_pool:PgPool,
     user_email:&str,
     _user_password:&str
 )->Result<u32,()>{

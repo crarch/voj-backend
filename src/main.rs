@@ -9,7 +9,7 @@ mod database;
 mod utils;
 mod handlers;
 
-use crate::database::Pool;
+use crate::database::PgPool;
 use crate::utils::env;
 
 #[actix_web::main]

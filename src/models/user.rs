@@ -1,6 +1,6 @@
 use serde::{Deserialize,Serialize};
 
-use crate::Pool;
+use crate::PgPool;
 
 
 #[derive(Debug,Serialize,Deserialize)]
@@ -36,7 +36,7 @@ impl User{
     
     
     pub fn get_user_by_id(
-        pg_pool:Pool,
+        pg_pool:PgPool,
         user_id:u32,
     )->Result<User,()>{
         let mut client=pg_pool.get().unwrap();
@@ -67,7 +67,7 @@ impl User{
 }
     
 pub fn get_user_password_by_email(
-    pg_pool:Pool,
+    pg_pool:PgPool,
     user_email:&str,
 )->Result<(u32,String),()>{
     let mut client=pg_pool.get().unwrap();

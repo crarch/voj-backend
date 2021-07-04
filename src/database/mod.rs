@@ -2,12 +2,12 @@ use actix_web::web;
 use r2d2;
 use r2d2_postgres::{postgres::NoTls, PostgresConnectionManager};
 
-type _Pool = r2d2::Pool<r2d2_postgres::PostgresConnectionManager<NoTls>>;
-pub type Pool = web::Data<_Pool>;
+type _PgPool = r2d2::Pool<r2d2_postgres::PostgresConnectionManager<NoTls>>;
+pub type PgPool = web::Data<_PgPool>;
 
 use crate::env::get_env;
 
-pub fn get_database_pg_pool()->_Pool{
+pub fn get_database_pg_pool()->_PgPool{
     
     dotenv::dotenv().ok();
     
