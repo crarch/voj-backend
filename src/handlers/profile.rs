@@ -1,8 +1,7 @@
 use actix_web::{web,HttpRequest,HttpResponse,post,Error,get};
-use mongodb::bson::doc;
 
-use crate::MongoDB;
 use crate::models::UserId;
+use crate::MongoDB;
 
 use crate::models::Pass;
 
@@ -11,11 +10,8 @@ pub async fn get_pass(
     mongo:MongoDB,
     user_id:UserId
 )->Result<HttpResponse,Error>{
-    let collection=mongo.collection::<Pass>("pass");
     
-    let cursor=collection.find_one(doc!{"user_id":1},None).unwrap();
-    
-    let result=cursor.unwrap();
+    let result=Pass::get_pass_by_id(mongo,user_id.user_id);
     
     Ok(HttpResponse::Ok().json(result))
 }

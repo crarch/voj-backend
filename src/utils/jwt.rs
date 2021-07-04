@@ -22,7 +22,7 @@ impl Claims{
 pub fn sign_jwt(user_id:u32)->Result<String,()>{
     let my_claims=Claims{
         user_id:user_id,
-        exp:now_plus_days(100),
+        exp:now_plus_days(1),
     };
     let key=get_env("SECRET_KEY");
     
