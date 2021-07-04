@@ -1,4 +1,5 @@
 pub mod session;
+pub mod profile;
 
 use crate::env;
 

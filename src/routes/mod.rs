@@ -7,12 +7,15 @@ use crate::handlers::{
 };
 
 use crate::handlers::session::*;
+use crate::handlers::profile::*;
 
 pub fn routing(cfg:&mut web::ServiceConfig){
     cfg
         .service(get_jwt_token)
+        .service(get_pass)
         .service(refresh_jwt_token)
         .service(get_version);
+        
 }
             
 
