@@ -20,9 +20,9 @@ r2d2=""
 jsonwebtoken = "7.2.0"
 futures=""
 futures-util=""
-bson="2.0.0-beta.2"
+bson="^2.0.0-beta.2"
 
 [dependencies.mongodb]
-version="2.0.0-beta.2"
+version="^2.0.0-beta.2"
 default-features=false
 features=["sync"]
