@@ -1,4 +1,4 @@
-use actix_web::{middleware::Logger,App,HttpServer,HttpResponse};
+use actix_web::{web,middleware::Logger,App,HttpServer,HttpResponse};
 use actix_web::dev::Service;
 use actix_web::{HttpMessage,web::Data};
 
@@ -18,28 +18,24 @@ pub async fn server()->std::io::Result<()>{
     
     let listen:String=get_env("LISTEN_IP")+":"+&(get_env("LISTEN_PORT"));
     
-    
     HttpServer::new(move||{
         App::new()
-            .wrap_fn(|req,srv|{
-                
-                let mut authorized=false;
-                if let Some(authorization)=req.headers().get("Authorization"){
-                    if let Ok(token)=authorization.to_str(){
-                        if let Ok(token_data)=validate_jwt(token){
-                            let user_id=token_data.claims.get_user_id();
-                            let user_id=UserId{user_id:user_id};
-                            req.extensions_mut().insert(user_id);
-                            
-                            authorized=true;
+            .service(
+                web::scope("/profile")
+                    .wrap_fn(|req,srv|{
+                        let mut authorized=false;
+                        if let Some(authorization)=req.headers().get("Authorization"){
+                            if let Ok(token)=authorization.to_str(){
+                                if let Ok(token_data)=validate_jwt(token){
+                                    let user_id=token_data.claims.get_user_id();
+                                    let user_id=UserId{user_id:user_id};
+                                    req.extensions_mut().insert(user_id);
+                                    authorized=true;
+                                }
+                            }
                         }
-                    }
-                }
-                
-                match(authorized){
-                    true=>srv.call(req),
-                    false=>{
-                        if(*&req.path().starts_with("/session")||*&req.path().starts_with("/version")){
+                        
+                        if(authorized){
                             srv.call(req)
                         }else{
                             Box::pin(async move {
@@ -48,13 +44,11 @@ pub async fn server()->std::io::Result<()>{
                                         .finish()
                                 ))
                             })
-                        }      
-                    }
-                }
-            })
-                        
-            .app_data(Data::new(mongodb.clone()))
+                        }
+                    })
+            )
             .configure(routing)
+            .app_data(Data::new(mongodb.clone()))
             .wrap(Logger::new("%a \"%r\" %s"))
     })
         .bind(&listen[..])?
