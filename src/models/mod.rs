@@ -14,14 +14,14 @@ pub struct Pass{
 }
 
 
-pub fn get_pass_by_id(mongo:MongoDB,user_id:u32)->Pass{
+pub fn get_pass_by_id(mongo:MongoDB,user_id:u32)->Result<Pass,()>{
     let collection=mongo.collection::<Pass>("users");
 
     let cursor=collection.find_one(doc!{"_id":user_id},None).unwrap();
 
     let result=cursor.unwrap();
     
-    result
+    Ok(result)
 }
 
 pub fn add_pass_by_id(mongo:MongoDB,user_id:u32,pass:u32)->Result<(),()>{
@@ -37,4 +37,26 @@ pub fn add_pass_by_id(mongo:MongoDB,user_id:u32,pass:u32)->Result<(),()>{
         Ok(_)=>Ok(()),
         Err(_)=>Err(()),
     }
+}
+
+
+pub fn get_question_by_id(mongo:MongoDB,question_id:u32)->Result<Question,()>{
+    let collection=mongo.collection::<Question>("questions");
+
+    if let Ok(cursor)=collection.find_one(doc!{"_id":question_id},None){
+        if let Some(result)=cursor{
+            return Ok(result);
+        }
+    }
+        
+    Err(())
+    
+}
+
+use bson::Bson;
+#[derive(Debug,Serialize,Deserialize)]
+pub struct Question{
+    _id:u32,
+    update:u64,
+    test_bench:Bson,
 }
