@@ -1,6 +1,6 @@
 use actix_web::{middleware::Logger,App,HttpServer,HttpResponse};
 use actix_web::dev::Service;
-use actix_web::{HttpMessage};
+use actix_web::{HttpMessage,web::Data};
 
 use crate::utils::jwt::validate_jwt;
 use crate::database::get_mongo_database;
@@ -46,7 +46,6 @@ pub async fn server()->std::io::Result<()>{
                                 Ok(req.into_response(
                                     HttpResponse::Unauthorized()
                                         .finish()
-                                        .into_body(),
                                 ))
                             })
                         }      
@@ -54,7 +53,7 @@ pub async fn server()->std::io::Result<()>{
                 }
             })
                         
-            .data(mongodb.clone())
+            .app_data(Data::new(mongodb.clone()))
             .configure(routing)
             .wrap(Logger::new("%a \"%r\" %s"))
     })

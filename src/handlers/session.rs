@@ -21,7 +21,7 @@ pub async fn get_jwt_token(
         &user_auth_json.user_email,
         &user_auth_json.user_password
     ){
-        let jwt_token=sign_jwt(user_id)?;
+        let jwt_token=sign_jwt(user_id).unwrap();
         
         let body=format!("{{\"Authorization\":\"{}\"}}",jwt_token);
         
@@ -32,7 +32,6 @@ pub async fn get_jwt_token(
     }else{
         Ok(HttpResponse::Unauthorized()
             .finish()
-            .into_body()
         )
     }
 }
@@ -46,7 +45,7 @@ pub async fn refresh_jwt_token(
             if let Ok(token_data)=validate_jwt(token){
                 let user_id=token_data.claims.get_user_id();
                 
-                let jwt_token=sign_jwt(user_id)?;
+                let jwt_token=sign_jwt(user_id).unwrap();
                 
                 let body=format!("{{\"Authorization\":\"{}\"}}",jwt_token);
                 
@@ -60,7 +59,6 @@ pub async fn refresh_jwt_token(
     }
     Ok(HttpResponse::Unauthorized()
         .finish()
-        .into_body()
     )
 }
 
