@@ -1,10 +1,8 @@
 use actix_web::dev::{Service, ServiceRequest, ServiceResponse, Transform};
-
 use futures::future::{ok, Ready};
 use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
-
 use actix_web::HttpMessage;
 
 use crate::utils::jwt::validate_jwt;
