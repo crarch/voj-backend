@@ -2,6 +2,8 @@ use mongodb::bson::doc;
 use bson::document::Document;
 use crate::MongoDB;
 
+use serde::{Deserialize,Serialize};
+
 pub fn get_pass_by_id(mongo:MongoDB,user_id:u32)->Result<Document,()>{
     let collection=mongo.collection::<Document>("users");
 
@@ -30,4 +32,9 @@ pub fn add_pass_by_id(mongo:MongoDB,user_id:u32,pass:u32)->Result<(),()>{
         Ok(_)=>Ok(()),
         Err(_)=>Err(()),
     }
+}
+
+#[derive(Debug,Serialize,Deserialize)]
+pub struct Pass{
+    pass:Vec<i32>,
 }
