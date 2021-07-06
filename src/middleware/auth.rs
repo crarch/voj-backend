@@ -69,7 +69,7 @@ where
                 })
             }else{
                 Box::pin(async move {
-                        Err(actix_web::error::ErrorUnauthorized("Invalid JWT Token"))
+                        Err(actix_web::error::ErrorUnauthorized(""))
                 })
             }
             
