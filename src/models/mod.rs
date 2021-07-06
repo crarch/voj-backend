@@ -56,7 +56,6 @@ pub fn create_new_record(mongo:MongoDB,user_id:u32,question_id:u32,code:&str)->R
 }
 
 
-// pub fn update_judge_result();
 
 
 

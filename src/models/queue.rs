@@ -2,6 +2,7 @@ use serde::{Deserialize,Serialize};
 use bson::document::Document;
 use mongodb::bson::doc;
 use bson::oid::ObjectId;
+use bson::Bson;
 
 use crate::utils::time::get_unix_timestamp;
 use crate::MongoDB;
@@ -70,4 +71,56 @@ fn queue_get_job_by_id(
     }
         
     Err(())
+}
+
+pub fn queue_delete_job_by_id(
+    mongo:MongoDB,
+    object_id:&str,
+)->Result<(),()>{
+    
+    let collection=mongo.collection::<Document>("queue");
+    
+    if let Ok(object_id)=ObjectId::parse_str(object_id){
+        if let Ok(_result)=collection.delete_one(
+            doc!{"_id":object_id},
+            None
+        ){
+            return Ok(());
+        }
+    }
+    Err(())
+}
+
+pub fn queue_update_judge_result(
+    mongo:MongoDB,
+    object_id:&str,
+    is_success:bool,
+    test_bench:&Bson
+)->Result<(),()>{
+    let collection=mongo.collection::<Document>("records");
+    
+    if let Ok(object_id)=ObjectId::parse_str(object_id){
+        if let Ok(_result)=collection.update_one(
+            doc!{"_id":object_id},
+            doc!{
+                "$set":{
+                    "success":is_success,
+                    "test_bench":test_bench
+                }
+            },
+            None
+
+        ){
+            return Ok(());
+        }
+    }
+    Err(())
+}
+            
+
+#[derive(Debug,Serialize,Deserialize)]
+pub struct JudgeResultJson{
+    pub object_id:String,
+    pub success:bool,
+    pub test_bench:Bson,
 }

@@ -5,8 +5,6 @@ use crate::MongoDB;
 
 use crate::utils::auth::UserAuthJson;
 
-
-
 use crate::utils::jwt::{validate_jwt,sign_jwt};
 
 use crate::utils::auth::auth_user;

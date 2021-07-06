@@ -15,6 +15,7 @@ use crate::handlers::queue::*;
 pub fn routing(cfg:&mut web::ServiceConfig){
     cfg
         .service(get_question)
+        .service(return_judge_result)
         .service(get_first_job)
         .service(get_record)
         .service(judge)
