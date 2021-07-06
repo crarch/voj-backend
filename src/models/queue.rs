@@ -5,6 +5,7 @@ use bson::oid::ObjectId;
 use bson::Bson;
 
 use crate::utils::time::get_unix_timestamp;
+use crate::models::pass::add_pass_by_id;
 use crate::MongoDB;
 
 pub fn queue_add_job(
@@ -111,6 +112,26 @@ pub fn queue_update_judge_result(
             None
 
         ){
+            
+            if(is_success){
+                let result=collection.find_one(
+                    doc!{"_id":object_id},
+                    mongodb::options::FindOneOptions::builder()
+                        .projection(Some(doc!{"user_id":1,"question_id":1,"_id":0}))
+                        .build()
+                );
+                
+                let result=result.unwrap().unwrap();
+                
+                let user_id=result.get_i32("user_id").unwrap() as u32;
+                let question_id=result.get_i32("question_id").unwrap() as u32;
+                
+                let _result=add_pass_by_id(mongo,user_id,question_id).unwrap();    
+            }
+                
+                
+
+                
             return Ok(());
         }
     }
