@@ -1,6 +1,7 @@
 pub mod session;
 pub mod profile;
 pub mod question;
+pub mod judge;
 
 use crate::env;
 

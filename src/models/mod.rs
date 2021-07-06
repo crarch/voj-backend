@@ -53,10 +53,30 @@ pub fn get_question_by_id(mongo:MongoDB,question_id:u32)->Result<Question,()>{
     
 }
 
+pub fn get_question_update_by_id(mongo:MongoDB,question_id:u32)->Result<u32,()>{
+    let collection=mongo.collection::<Question>("questions");
+
+    if let Ok(cursor)=collection.find_one(doc!{"_id":question_id},None){
+        if let Some(result)=cursor{
+            return Ok(result.update);
+        }
+    }
+        
+    Err(())
+    
+}
+
 use bson::Bson;
 #[derive(Debug,Serialize,Deserialize)]
 pub struct Question{
-    _id:u32,
-    update:u64,
+    pub _id:u32,
+    pub update:u32,
     test_bench:Bson,
+}
+
+
+#[derive(Debug,Serialize,Deserialize)]
+pub struct CodeJson{
+    pub _id:u32,
+    pub code:String
 }

@@ -8,6 +8,7 @@ use crate::database::get_mongo_database;
 use crate::routes::routing;
 use crate::env::get_env;
 use crate::models::UserId;
+use crate::middleware;
 
 
 pub async fn server()->std::io::Result<()>{
@@ -20,38 +21,13 @@ pub async fn server()->std::io::Result<()>{
     
     HttpServer::new(move||{
         App::new()
-            .service(
-                web::scope("/profile")
-                    .wrap_fn(|req,srv|{
-                        let mut authorized=false;
-                        if let Some(authorization)=req.headers().get("Authorization"){
-                            if let Ok(token)=authorization.to_str(){
-                                if let Ok(token_data)=validate_jwt(token){
-                                    let user_id=token_data.claims.get_user_id();
-                                    let user_id=UserId{user_id:user_id};
-                                    req.extensions_mut().insert(user_id);
-                                    authorized=true;
-                                }
-                            }
-                        }
-                        
-                        if(authorized){
-                            srv.call(req)
-                        }else{
-                            Box::pin(async move {
-                                Ok(req.into_response(
-                                    HttpResponse::Unauthorized()
-                                        .finish()
-                                ))
-                            })
-                        }
-                    })
-            )
+            .service(web::scope("/profile").wrap(middleware::Auth))
+            .service(web::scope("/judge").wrap(middleware::Auth))
             .configure(routing)
             .app_data(Data::new(mongodb.clone()))
             .wrap(Logger::new("%a \"%r\" %s"))
     })
-        .bind(&listen[..])?
+        .bind(&listen)?
         .run()
         .await
 }
