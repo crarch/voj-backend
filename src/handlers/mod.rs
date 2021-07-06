@@ -2,6 +2,7 @@ pub mod session;
 pub mod profile;
 pub mod question;
 pub mod judge;
+pub mod queue;
 
 use crate::env;
 

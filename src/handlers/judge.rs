@@ -1,4 +1,5 @@
 use actix_web::{web,HttpRequest,HttpResponse,post,Error,get};
+use mongodb::bson::doc;
 
 use crate::MongoDB;
 
@@ -31,13 +32,16 @@ pub async fn judge(
                 code
             ).unwrap();
             
+            let result=doc!{
+                "_id":result
+            };
+            
             return Ok(HttpResponse::Ok().json(result));
         }
     }
     
     Ok(HttpResponse::NotFound().finish())
 }
-
 
 use crate::models::get_record_by_object_id;
 
