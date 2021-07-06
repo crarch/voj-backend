@@ -1,13 +1,13 @@
-use actix_web::{web,middleware::Logger,App,HttpServer,HttpResponse};
-use actix_web::dev::Service;
-use actix_web::{HttpMessage,web::Data};
+use actix_web::{web,middleware::Logger,App,HttpServer};
 
-use crate::utils::jwt::validate_jwt;
+use actix_web::{web::Data};
+
+
 use crate::database::get_mongo_database;
 
 use crate::routes::routing;
 use crate::env::get_env;
-use crate::models::UserId;
+
 use crate::middleware;
 
 

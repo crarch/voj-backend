@@ -12,7 +12,7 @@ pub async fn judge(
     code_json:web::Json<CodeJson>
 )->Result<HttpResponse,Error>{
     
-    if let Ok(result)=get_question_update_by_id(mongo,code_json._id){
+    if let Ok(_result)=get_question_update_by_id(mongo,code_json._id){
         return Ok(HttpResponse::Ok().body(""));
     }
     
