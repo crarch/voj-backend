@@ -14,6 +14,7 @@ use crate::handlers::judge::*;
 pub fn routing(cfg:&mut web::ServiceConfig){
     cfg
         .service(get_question)
+        .service(get_record)
         .service(judge)
         .service(get_jwt_token)
         .service(get_pass)
