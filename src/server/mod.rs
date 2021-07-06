@@ -1,4 +1,4 @@
-use actix_web::{web,middleware::Logger,App,HttpServer};
+use actix_web::{middleware::Logger,App,HttpServer};
 
 use actix_web::{web::Data};
 
