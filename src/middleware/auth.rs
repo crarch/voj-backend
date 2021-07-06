@@ -59,15 +59,22 @@ where
                 }
             }
         
-            if(authorized){
+            if(
+                !authorized
+                &&
+                (
+                    *&req.path().starts_with("/profile")
+                    ||*&req.path().starts_with("/judge")
+                )
+            ){
+                Box::pin(async move {
+                        Err(actix_web::error::ErrorUnauthorized(""))
+                })
+            }else{
                 let fut = self.service.call(req);
                 Box::pin(async move {
                     let res = fut.await?;
                     Ok(res)
-                })
-            }else{
-                Box::pin(async move {
-                        Err(actix_web::error::ErrorUnauthorized(""))
                 })
             }
             

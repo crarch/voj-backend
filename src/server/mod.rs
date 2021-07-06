@@ -21,8 +21,7 @@ pub async fn server()->std::io::Result<()>{
     
     HttpServer::new(move||{
         App::new()
-            .service(web::scope("/profile").wrap(middleware::Auth))
-            .service(web::scope("/judge").wrap(middleware::Auth))
+            .wrap(middleware::Auth)
             .configure(routing)
             .app_data(Data::new(mongodb.clone()))
             .wrap(Logger::new("%a \"%r\" %s"))
