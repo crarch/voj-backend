@@ -7,9 +7,7 @@ pub fn get_question_by_id(mongo:MongoDB,question_id:u32)->Result<Document,()>{
 
     if let Ok(cursor)=collection.find_one(
         doc!{"_id":question_id},
-        mongodb::options::FindOneOptions::builder()
-            .projection(Some(doc!{"_id":0,"update":1}))
-            .build()
+        None,
     ){
         if let Some(result)=cursor{
             return Ok(result);
