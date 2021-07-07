@@ -6,6 +6,7 @@ use crate::MongoDB;
 use crate::models::get_question_update_by_id;
 use crate::models::create_new_record;
 use crate::models::queue_add_job;
+use crate::models::get_record_list_by_page;
 
 use crate::models::CodeJson;
 use crate::models::UserId;
@@ -58,3 +59,18 @@ pub async fn get_record(
     
     Ok(HttpResponse::NotFound().finish())
 }
+
+#[get("/judge/record/page/{page}")]
+pub async fn get_record_list(
+    mongo:MongoDB,
+    path: web::Path<(u64,)>,
+    user_id:UserId
+)->Result<HttpResponse,Error>{
+
+    if let Ok(result)=get_record_list_by_page(mongo,path.into_inner().0,user_id.user_id){
+        return Ok(HttpResponse::Ok().json(result));
+    }
+
+    Ok(HttpResponse::NotFound().finish())
+}
+

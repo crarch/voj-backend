@@ -60,6 +60,33 @@ pub fn get_record_by_object_id(mongo:MongoDB,object_id:&str,user_id:u32)->Result
     Err(())
 }
 
+pub fn get_record_list_by_page(mongo:MongoDB,page:u64,user_id:u32)->Result<Vec<Document>,()>{
+    
+    let collection=mongo.collection::<Document>("records");
+    let page=(page-1)*20;
+    if let Ok(cursor)=collection.find(
+        doc!{"user_id":user_id},
+        mongodb::options::FindOptions::builder()
+            .projection(Some(doc!{
+                "_id":1,
+                "submit_time":1,
+                "question_id":1,
+                "success":1
+            }))
+            .sort(doc!{"submit_time":-1})
+            .limit(Some(20))
+            .skip(Some(page))
+            .build()
+    ){
+        let mut result=Vec::new();
+        for iter in cursor{
+            result.push(iter.unwrap());
+        }
+        return Ok(result);
+    }
+    
+    Err(())
+}
 
 
 #[derive(Debug,Serialize,Deserialize)]
