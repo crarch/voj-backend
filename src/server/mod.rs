@@ -1,4 +1,5 @@
 use actix_web::{middleware::Logger,App,HttpServer};
+use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 
 use actix_web::{web::Data};
 
@@ -19,6 +20,16 @@ pub async fn server()->std::io::Result<()>{
     
     let listen:String=get_env("LISTEN_IP")+":"+&(get_env("LISTEN_PORT"));
     
+    let ssl_key=get_env("SSL_KEY");
+    let ssl_cert=get_env("SSL_CERT");
+    
+    let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
+    builder
+        .set_private_key_file(&ssl_key, SslFiletype::PEM)
+        .unwrap();
+    builder.set_certificate_chain_file(&ssl_cert).unwrap();
+    
+    
     HttpServer::new(move||{
         App::new()
             .wrap(middleware::Auth)
@@ -26,7 +37,7 @@ pub async fn server()->std::io::Result<()>{
             .app_data(Data::new(mongodb.clone()))
             .wrap(Logger::new("%a \"%r\" %s"))
     })
-        .bind(&listen)?
+        .bind_openssl(&listen,builder)?
         .run()
         .await
 }
