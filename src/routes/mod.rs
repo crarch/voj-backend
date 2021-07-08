@@ -8,13 +8,13 @@ use crate::handlers::{
 
 use crate::handlers::session::*;
 use crate::handlers::profile::*;
-use crate::handlers::question::*;
+use crate::handlers::testbench::*;
 use crate::handlers::judge::*;
 use crate::handlers::queue::*;
 
 pub fn routing(cfg:&mut web::ServiceConfig){
     cfg
-        .service(get_question)
+        .service(get_testbench)
         .service(get_record_list)
         .service(return_judge_result)
         .service(get_first_job)

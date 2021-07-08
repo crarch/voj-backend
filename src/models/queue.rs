@@ -23,6 +23,7 @@ pub fn queue_add_job(
         "update":update,
         "submit_time":get_unix_timestamp(),
         "code":code,
+        "judger":0u32
     };
     
     let result=collection.insert_one(doc,None);
@@ -42,7 +43,7 @@ pub fn queue_get_first_job(
     let collection=mongo.collection::<Document>("queue");
 
     if let Ok(_)=collection.update_one(
-        doc!{"judger":doc!{"$exists":false}},
+        doc!{"judger":0u32},
         doc!{"$set":{"judger":judger_id}},
         None
     ){
@@ -95,13 +96,13 @@ pub fn queue_update_judge_result(
     mongo:MongoDB,
     object_id:&str,
     is_success:bool,
-    test_bench:&Bson
+    test_bench:&Document,
 )->Result<(),()>{
     let collection=mongo.collection::<Document>("records");
     
     if let Ok(object_id)=ObjectId::parse_str(object_id){
         if let Ok(_result)=collection.update_one(
-            doc!{"_id":object_id,"success":doc!{"$exists":false}},
+            doc!{"_id":object_id},
             doc!{
                 "$set":{
                     "success":is_success,
@@ -140,7 +141,7 @@ pub fn queue_update_judge_result(
 
 #[derive(Debug,Serialize,Deserialize)]
 pub struct JudgeResultJson{
-    pub object_id:String,
+    pub _id:String,
     pub success:bool,
-    pub test_bench:Bson,
+    pub test_bench:Document,
 }

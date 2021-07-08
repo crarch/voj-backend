@@ -56,11 +56,11 @@ pub async fn return_judge_result(
             if(key==get_env("JUDGER_KEY")){
                 if let Ok(_result)=queue_update_judge_result(
                     mongo.clone(),
-                    &judge_result.object_id,
+                    &judge_result._id,
                     judge_result.success,
                     &judge_result.test_bench
                 ){
-                    if let Ok(_result)=queue_delete_job_by_id(mongo,&judge_result.object_id){
+                    if let Ok(_result)=queue_delete_job_by_id(mongo,&judge_result._id){
                         return Ok(HttpResponse::Ok().finish());
                     }                
                 }

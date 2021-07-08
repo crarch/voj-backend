@@ -3,7 +3,7 @@ use mongodb::bson::doc;
 
 use crate::MongoDB;
 
-use crate::models::get_question_update_by_id;
+use crate::models::get_testbench_update_by_id;
 use crate::models::create_new_record;
 use crate::models::queue_add_job;
 use crate::models::get_record_list_by_page;
@@ -21,7 +21,7 @@ pub async fn judge(
     let question_id=code_json.question_id;
     let code=&code_json.code;
     
-    if let Ok(update)=get_question_update_by_id(mongo.clone(),code_json.question_id){
+    if let Ok(update)=get_testbench_update_by_id(mongo.clone(),code_json.question_id){
         if let Ok(result)=create_new_record(mongo.clone(),user_id.user_id,question_id,code){
             let object_id=result.get_str("$oid").unwrap();
             
