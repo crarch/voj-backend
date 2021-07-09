@@ -1,4 +1,4 @@
-use actix_web::{middleware::Logger,App,HttpServer};
+use actix_web::{App,HttpServer};
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 
 use actix_web::{web::Data};

@@ -21,11 +21,13 @@ pub async fn get_first_job(
 )->Result<HttpResponse,Error>{
     if let Some(authorization)=req.headers().get("Authorization"){
         if let Ok(key)=authorization.to_str(){
-            let result=match queue_get_first_job(mongo){
-                Ok(result)=>HttpResponse::Ok().json(result),
-                Err(_)=>HttpResponse::Ok().body(""),
-            };
-            return Ok(result);
+            if(key==get_env("JUDGER_KEY")){
+                let result=match queue_get_first_job(mongo){
+                    Ok(result)=>HttpResponse::Ok().json(result),
+                    Err(_)=>HttpResponse::Ok().body(""),
+                };
+                return Ok(result);
+            }
         }
     }
     Ok(HttpResponse::Unauthorized()
