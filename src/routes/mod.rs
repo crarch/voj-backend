@@ -14,6 +14,7 @@ use crate::handlers::queue::*;
 
 pub fn routing(cfg:&mut web::ServiceConfig){
     cfg
+        .service(get_record_list_by_question)
         .service(get_testbench)
         .service(get_record_list)
         .service(return_judge_result)
