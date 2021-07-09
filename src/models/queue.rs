@@ -45,11 +45,7 @@ pub fn queue_get_first_job(
         doc!{"$set":{"judger":judger_id}},
         None
     ){
-        if(result.modified_count==1){
-            return queue_get_job_by_id(mongo,judger_id);
-        }else{
-            return Err(()); 
-        }
+        return queue_get_job_by_id(mongo,judger_id);
     }
     
     Err(())

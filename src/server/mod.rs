@@ -35,7 +35,7 @@ pub async fn server()->std::io::Result<()>{
             .wrap(middleware::Auth)
             .configure(routing)
             .app_data(Data::new(mongodb.clone()))
-            .wrap(Logger::new("%a \"%r\" %s"))
+            // .wrap(Logger::new("%a \"%r\" %s"))
     })
         .bind_openssl(&listen,builder)?
         .run()
