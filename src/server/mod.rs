@@ -8,6 +8,7 @@ use crate::database::get_mongo_database;
 
 use crate::routes::routing;
 use crate::env::get_env;
+use crate::models::cron;
 
 use crate::middleware;
 
@@ -28,6 +29,8 @@ pub async fn server()->std::io::Result<()>{
         .set_private_key_file(&ssl_key, SslFiletype::PEM)
         .unwrap();
     builder.set_certificate_chain_file(&ssl_cert).unwrap();
+        
+    cron(Data::new(mongodb.clone()));
     
     
     HttpServer::new(move||{

@@ -21,7 +21,7 @@ pub fn queue_add_job(
         "question_id":question_id,
         "update":update,
         "submit_time":get_unix_timestamp(),
-        "code":code
+        "code":code,
     };
     
     let result=collection.insert_one(doc,None);
@@ -36,41 +36,53 @@ pub fn queue_add_job(
 
 pub fn queue_get_first_job(
     mongo:MongoDB,
-    judger_id:u32
-)->Result<Document,()>{
-    let collection=mongo.collection::<Document>("queue");
-
-    if let Ok(result)=collection.update_one(
-        doc!{"judger":doc!{"$exists":false}},
-        doc!{"$set":{"judger":judger_id}},
-        None
-    ){
-        return queue_get_job_by_id(mongo,judger_id);
-    }
-    
-    Err(())
-    
-}
-
-    
-    
-fn queue_get_job_by_id(
-    mongo:MongoDB,
-    judger_id:u32,
 )->Result<Document,()>{
     let collection=mongo.collection::<Document>("queue");
 
     if let Ok(cursor)=collection.find_one(
-        doc!{"judger":judger_id},
+        doc!{"lock_time":doc!{"$exists":false}},
         None
     ){
         if let Some(result)=cursor{
-            return Ok(result);
+            if let Ok(object_id)=result.get_object_id("_id"){
+                if let Ok(_)=lock_job_by_id(mongo,object_id){
+                    return Ok(result);
+                }
+            }
         }
     }
         
     Err(())
+    
 }
+
+fn lock_job_by_id(
+    mongo:MongoDB,
+    object_id:ObjectId
+)->Result<(),()>{
+    let collection=mongo.collection::<Document>("queue");
+    
+    if let Ok(result)=collection.update_one(
+        doc!{"_id":object_id,"lock_time":doc!{"$exists":false}},
+        doc!{
+            "$set":{
+                "lock_time":get_unix_timestamp()
+            }
+        },
+        None
+    ){
+        if(result.modified_count==1){
+            return Ok(());
+        }else{
+            return Err(());
+        }
+    }
+    
+    Err(())
+    
+}
+    
+
 
 pub fn queue_delete_job_by_id(
     mongo:MongoDB,
@@ -135,6 +147,61 @@ pub fn queue_update_judge_result(
     }
     Err(())
 }
+
+pub fn check_dead_job(mongo:MongoDB){
+    let collection=mongo.clone().collection::<Document>("queue");
+    
+    if let Ok(cursor)=collection.find(
+        doc!{"lock_time":doc!{"$gt":get_unix_timestamp()-20}},
+        mongodb::options::FindOptions::builder()
+            .projection(Some(doc!{"_id":1}))
+            .build()
+    ){
+        for result in cursor{
+            if let Ok(doc)=result{
+                if let Ok(object_id)=doc.get_object_id("_id"){
+                    let time_out=doc!{
+                        "time_out":"timeout",
+                    };
+                    
+                    let object_id=object_id.to_hex();
+                    
+                    let _=queue_update_judge_result(
+                        mongo.clone(),
+                        &object_id,
+                        false,
+                        &time_out
+                    ).unwrap();
+                    
+                    let _=queue_delete_job_by_id(
+                        mongo.clone(),
+                        &object_id,
+                    ).unwrap();
+                    
+                }
+            }
+        }
+    }
+    
+}
+
+use std::thread;
+use std::time::Duration;
+    
+pub fn cron(mongo:MongoDB){
+    thread::spawn(move||
+        loop{
+            thread::sleep(Duration::from_secs(20));
+            check_dead_job(mongo.clone());
+        }
+    );
+    
+}    
+    
+    
+        
+        
+    
             
 
 #[derive(Debug,Serialize,Deserialize)]
