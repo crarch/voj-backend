@@ -15,12 +15,13 @@ pub fn auth_user(
     user_email:&str,
     _user_password:&str
 )->Result<u32,()>{
-    let (user_id,user_password)=get_user_password_by_email(mongo,user_email)?;
-    if(_user_password==user_password){
-        Ok(user_id)
-    }else{
-        Err(())
+    let (user_id,hash)=get_user_password_by_email(mongo,user_email)?;
+    if let Ok(matches)=argon2::verify_encoded(&hash,_user_password.as_bytes()){
+        if(matches){
+            return Ok(user_id);
+        }
     }
+    Err(())
 }
         
         
