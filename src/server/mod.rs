@@ -4,18 +4,19 @@ use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 use actix_web::{web::Data};
 
 
-use crate::database::get_mongo_database;
+// use crate::database::get_mongo_database;
 
 use crate::routes::routing;
 use crate::env::get_env;
-use crate::models::cron;
+// use crate::models::cron;
 
-use crate::middleware;
+// use crate::middleware;
+use crate::database::get_db;
 
 
 pub async fn server()->std::io::Result<()>{
     
-    let mongodb=get_mongo_database();
+    // let mongodb=get_mongo_database();
     
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
     
@@ -30,14 +31,14 @@ pub async fn server()->std::io::Result<()>{
         .unwrap();
     builder.set_certificate_chain_file(&ssl_cert).unwrap();
         
-    cron(Data::new(mongodb.clone()));
-    
+    // cron(Data::new(mongodb.clone()));
+    let mongo=get_db().await;
     
     HttpServer::new(move||{
         App::new()
-            .wrap(middleware::Auth)
+            // .wrap(middleware::Auth)
             .configure(routing)
-            .app_data(Data::new(mongodb.clone()))
+            .app_data(Data::new(mongo.clone()))
             // .wrap(Logger::new("%a \"%r\" %s"))
     })
         .bind_openssl(&listen,builder)?

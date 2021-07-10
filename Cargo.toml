@@ -22,10 +22,9 @@ futures-util=""
 bson="^2.0.0-beta.2"
 openssl = { version = "0.10", features = ["v110"] }
 rust-argon2=""
+lazy_static=""
 
 [dependencies.mongodb]
 version="^2.0.0-beta.2"
-default-features=false
-features=["sync"]
 
 
