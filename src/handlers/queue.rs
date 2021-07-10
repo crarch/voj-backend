@@ -4,9 +4,9 @@ use crate::MongoDB;
 
 
 
-use crate::models::queue_get_first_job;
-use crate::models::queue_delete_job_by_id;
-use crate::models::queue_update_judge_result;
+use crate::models::query_first_job;
+use crate::models::delete_job_by_id;
+use crate::models::update_judge_result;
 use crate::models::queue::JudgeResultJson;
 
 
@@ -22,7 +22,7 @@ pub async fn get_first_job(
     if let Some(authorization)=req.headers().get("Authorization"){
         if let Ok(key)=authorization.to_str(){
             if(key==get_env("JUDGER_KEY")){
-                let result=match queue_get_first_job(mongo){
+                let result=match query_first_job(mongo).await{
                     Ok(result)=>HttpResponse::Ok().json(result),
                     Err(_)=>HttpResponse::Ok().body(""),
                 };
@@ -47,13 +47,13 @@ pub async fn return_judge_result(
     if let Some(authorization)=req.headers().get("Authorization"){
         if let Ok(key)=authorization.to_str(){
             if(key==get_env("JUDGER_KEY")){
-                if let Ok(_result)=queue_update_judge_result(
+                if let Ok(_result)=update_judge_result(
                     mongo.clone(),
                     &judge_result._id,
                     judge_result.success,
                     &judge_result.test_bench
-                ){
-                    if let Ok(_result)=queue_delete_job_by_id(mongo,&judge_result._id){
+                ).await{
+                    if let Ok(_result)=delete_job_by_id(mongo,&judge_result._id).await{
                         return Ok(HttpResponse::Ok().finish());
                     }                
                 }

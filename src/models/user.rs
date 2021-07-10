@@ -3,14 +3,14 @@ use mongodb::bson::doc;
 
 use crate::MongoDB;
     
-pub fn get_user_password_by_email(
+pub async fn query_user_password_by_email(
     mongo:MongoDB,
     user_email:&str
 )->Result<(u32,String),()>{
     
     let collection=mongo.collection::<UserPass>("users");
     
-    let cursor=collection.find_one(doc!{"user_email":&user_email},None).unwrap();
+    let cursor=collection.find_one(doc!{"user_email":&user_email},None).await.unwrap();
     
     if let Some(result)=cursor{
         return Ok((result._id,result.user_password));

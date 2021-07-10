@@ -3,7 +3,7 @@ use actix_web::{HttpResponse,Error,get};
 use crate::models::UserId;
 use crate::MongoDB;
 
-use crate::models::get_pass_by_id;
+use crate::models::query_pass_by_id;
 
 #[get("/profile/pass")]
 pub async fn get_pass(
@@ -11,7 +11,7 @@ pub async fn get_pass(
     user_id:UserId
 )->Result<HttpResponse,Error>{
     
-    let result=get_pass_by_id(mongo,user_id.user_id).unwrap();
+    let result=query_pass_by_id(mongo,user_id.user_id).await.unwrap();
     
     Ok(HttpResponse::Ok().json(result))
 }

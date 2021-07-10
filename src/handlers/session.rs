@@ -18,7 +18,7 @@ pub async fn get_jwt_token(
         mongo,
         &user_auth_json.user_email,
         &user_auth_json.user_password
-    ){
+    ).await{
         let jwt_token=sign_jwt(user_id).unwrap();
         
         let body=format!("{{\"Authorization\":\"{}\"}}",jwt_token);

@@ -1,4 +1,4 @@
-// pub mod auth;
+pub mod auth;
 pub mod env;
-// pub mod jwt;
+pub mod jwt;
 pub mod time;

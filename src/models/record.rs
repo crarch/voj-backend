@@ -2,11 +2,12 @@ use serde::{Deserialize,Serialize};
 use bson::document::Document;
 use mongodb::bson::doc;
 use bson::oid::ObjectId;
+use futures_util::TryStreamExt;
 
 use crate::utils::time::get_unix_timestamp;
 use crate::MongoDB;
 
-pub fn create_new_record(mongo:MongoDB,user_id:u32,question_id:u32,code:&str)->Result<Document,()>{
+pub async fn create_new_record(mongo:MongoDB,user_id:u32,question_id:u32,code:&str)->Result<Document,()>{
     
     let collection=mongo.collection::<Document>("records");
     
@@ -17,7 +18,7 @@ pub fn create_new_record(mongo:MongoDB,user_id:u32,question_id:u32,code:&str)->R
         "code":code
     };
     
-    let result=collection.insert_one(doc,None);
+    let result=collection.insert_one(doc,None).await;
     
     match result{
         Ok(insert_result)=>{
@@ -42,7 +43,7 @@ pub fn create_new_record(mongo:MongoDB,user_id:u32,question_id:u32,code:&str)->R
 
 
 //only owner can access record
-pub fn get_record_by_object_id(mongo:MongoDB,object_id:&str,user_id:u32)->Result<Document,()>{
+pub async fn query_record_by_object_id(mongo:MongoDB,object_id:&str,user_id:u32)->Result<Document,()>{
     
     let collection=mongo.collection::<Document>("records");
     
@@ -50,7 +51,7 @@ pub fn get_record_by_object_id(mongo:MongoDB,object_id:&str,user_id:u32)->Result
         if let Ok(result)=collection.find_one(
             doc!{"_id":object_id,"user_id":user_id},
             None
-        ){
+        ).await{
             if let Some(result)=result{
                 return Ok(result);
             }
@@ -60,11 +61,11 @@ pub fn get_record_by_object_id(mongo:MongoDB,object_id:&str,user_id:u32)->Result
     Err(())
 }
 
-pub fn get_record_list_by_page(mongo:MongoDB,page:u64,user_id:u32)->Result<Vec<Document>,()>{
+pub async fn query_record_list_by_page(mongo:MongoDB,page:u64,user_id:u32)->Result<Vec<Document>,()>{
     
     let collection=mongo.collection::<Document>("records");
     let page=(page-1)*20;
-    if let Ok(cursor)=collection.find(
+    if let Ok(mut cursor)=collection.find(
         doc!{"user_id":user_id},
         mongodb::options::FindOptions::builder()
             .projection(Some(doc!{
@@ -77,10 +78,10 @@ pub fn get_record_list_by_page(mongo:MongoDB,page:u64,user_id:u32)->Result<Vec<D
             .limit(Some(20))
             .skip(Some(page))
             .build()
-    ){
+    ).await{
         let mut result=Vec::new();
-        for iter in cursor{
-            result.push(iter.unwrap());
+        while let Some(record)=cursor.try_next().await.unwrap(){
+            result.push(record);
         }
         return Ok(result);
     }
@@ -88,11 +89,11 @@ pub fn get_record_list_by_page(mongo:MongoDB,page:u64,user_id:u32)->Result<Vec<D
     Err(())
 }
 
-pub fn get_record_list_by_page_and_question(mongo:MongoDB,question_id:u32,page:u64,user_id:u32)->Result<Vec<Document>,()>{
+pub async fn query_record_list_by_page_and_question(mongo:MongoDB,question_id:u32,page:u64,user_id:u32)->Result<Vec<Document>,()>{
     
     let collection=mongo.collection::<Document>("records");
     let page=(page-1)*20;
-    if let Ok(cursor)=collection.find(
+    if let Ok(mut cursor)=collection.find(
         doc!{"user_id":user_id,"question_id":question_id},
         mongodb::options::FindOptions::builder()
             .projection(Some(doc!{
@@ -105,10 +106,10 @@ pub fn get_record_list_by_page_and_question(mongo:MongoDB,question_id:u32,page:u
             .limit(Some(20))
             .skip(Some(page))
             .build()
-    ){
+    ).await{
         let mut result=Vec::new();
-        for iter in cursor{
-            result.push(iter.unwrap());
+        while let Some(record)=cursor.try_next().await.unwrap(){
+            result.push(record);
         }
         return Ok(result);
     }

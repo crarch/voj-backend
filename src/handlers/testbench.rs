@@ -2,7 +2,7 @@ use actix_web::{web,HttpResponse,Error,get};
 
 use crate::MongoDB;
 
-use crate::models::get_testbench_by_id;
+use crate::models::query_testbench_by_id;
 
 
 #[get("/testbench/{id}")]
@@ -11,7 +11,7 @@ pub async fn get_testbench(
     path: web::Path<(u32,)>
 )->Result<HttpResponse,Error>{
     
-    if let Ok(result)=get_testbench_by_id(mongo,path.into_inner().0).await{
+    if let Ok(result)=query_testbench_by_id(mongo,path.into_inner().0).await{
         return Ok(HttpResponse::Ok().json(result));
     }
     

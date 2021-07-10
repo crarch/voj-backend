@@ -3,11 +3,12 @@ use mongodb::bson::doc;
 
 use crate::MongoDB;
 
-use crate::models::get_testbench_update_by_id;
+use crate::models::query_testbench_update_by_id;
 use crate::models::create_new_record;
-use crate::models::queue_add_job;
-use crate::models::get_record_list_by_page;
-use crate::models::get_record_list_by_page_and_question;
+use crate::models::add_job;
+use crate::models::query_record_list_by_page;
+use crate::models::query_record_list_by_page_and_question;
+use crate::models::query_record_by_object_id;
 
 use crate::models::CodeJson;
 use crate::models::UserId;
@@ -22,17 +23,17 @@ pub async fn judge(
     let question_id=code_json.question_id;
     let code=&code_json.code;
     
-    if let Ok(update)=get_testbench_update_by_id(mongo.clone(),code_json.question_id){
-        if let Ok(result)=create_new_record(mongo.clone(),user_id.user_id,question_id,code){
+    if let Ok(update)=query_testbench_update_by_id(mongo.clone(),code_json.question_id).await{
+        if let Ok(result)=create_new_record(mongo.clone(),user_id.user_id,question_id,code).await{
             let object_id=result.get_str("$oid").unwrap();
             
-            queue_add_job(
+            add_job(
                 mongo,
                 object_id,
                 question_id,
                 update,
                 code
-            ).unwrap();
+            ).await.unwrap();
             
             let result=doc!{
                 "_id":result
@@ -45,7 +46,6 @@ pub async fn judge(
     Ok(HttpResponse::NotFound().finish())
 }
 
-use crate::models::get_record_by_object_id;
 
 #[get("/judge/record/{object_id}")]
 pub async fn get_record(
@@ -54,7 +54,7 @@ pub async fn get_record(
     user_id:UserId
 )->Result<HttpResponse,Error>{
     
-    if let Ok(result)=get_record_by_object_id(mongo,&path.into_inner().0,user_id.user_id){
+    if let Ok(result)=query_record_by_object_id(mongo,&path.into_inner().0,user_id.user_id).await{
         return Ok(HttpResponse::Ok().json(result));
     }
     
@@ -68,7 +68,7 @@ pub async fn get_record_list(
     user_id:UserId
 )->Result<HttpResponse,Error>{
 
-    if let Ok(result)=get_record_list_by_page(mongo,path.into_inner().0,user_id.user_id){
+    if let Ok(result)=query_record_list_by_page(mongo,path.into_inner().0,user_id.user_id).await{
         return Ok(HttpResponse::Ok().json(result));
     }
 
@@ -82,12 +82,12 @@ pub async fn get_record_list_by_question(
     user_id:UserId
 )->Result<HttpResponse,Error>{
     let path=path.into_inner();
-    if let Ok(result)=get_record_list_by_page_and_question(
+    if let Ok(result)=query_record_list_by_page_and_question(
         mongo,
         path.0,
         path.1,
         user_id.user_id
-    ){
+    ).await{
         return Ok(HttpResponse::Ok().json(result));
     }
 
