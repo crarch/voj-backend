@@ -19,12 +19,13 @@ pub async fn judge(
     code_json:web::Json<CodeJson>,
     user_id:UserId
 )->Result<HttpResponse,Error>{
+    let user_id=user_id.user_id;
     
     let question_id=code_json.question_id;
     let code=&code_json.code;
     
     if let Ok(update)=query_testbench_update_by_id(mongo.clone(),code_json.question_id).await{
-        if let Ok(result)=create_new_record(mongo.clone(),user_id.user_id,question_id,code).await{
+        if let Ok(result)=create_new_record(mongo.clone(),user_id,question_id,code).await{
             let object_id=result.get_str("$oid").unwrap();
             
             add_job(
@@ -32,6 +33,7 @@ pub async fn judge(
                 object_id,
                 question_id,
                 update,
+                user_id,
                 code
             ).await.unwrap();
             

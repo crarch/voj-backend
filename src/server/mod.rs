@@ -9,7 +9,7 @@ use crate::models::cron;
 
 use crate::middleware;
 use crate::database::get_db;
-
+use actix_web::middleware::Logger;
 
 pub async fn server()->std::io::Result<()>{
     
@@ -29,13 +29,15 @@ pub async fn server()->std::io::Result<()>{
     let mongo=get_db().await;
     cron(Data::new(mongo.clone())).await;
     
+    
     HttpServer::new(move||{
         App::new()
             .wrap(middleware::Auth)
             .configure(routing)
             .app_data(Data::new(mongo.clone()))
-            // .wrap(Logger::new("%a \"%r\" %s"))
+            .wrap(Logger::new("%a \"%r\" %s %D"))
     })
+        .keep_alive(75)
         .bind_openssl(&listen,builder)?
         .run()
         .await

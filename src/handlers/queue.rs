@@ -3,13 +3,11 @@ use actix_web::{web,HttpRequest,HttpResponse,post,Error,get};
 use crate::MongoDB;
 
 
-
 use crate::models::query_first_job;
 use crate::models::delete_job_by_id;
 use crate::models::update_judge_result;
 use crate::models::queue::JudgeResultJson;
-
-
+use crate::models::pass::add_pass_by_id;
 
 
 use crate::utils::env::get_env;
@@ -47,17 +45,28 @@ pub async fn return_judge_result(
     if let Some(authorization)=req.headers().get("Authorization"){
         if let Ok(key)=authorization.to_str(){
             if(key==get_env("JUDGER_KEY")){
-                if let Ok(_result)=update_judge_result(
+                let _result=update_judge_result(
                     mongo.clone(),
                     &judge_result._id,
                     judge_result.success,
                     &judge_result.test_bench
-                ).await{
-                    if let Ok(_result)=delete_job_by_id(mongo,&judge_result._id).await{
-                        return Ok(HttpResponse::Ok().finish());
-                    }                
+                ).await.unwrap();
+                
+                if(judge_result.success){
+                    let _result=add_pass_by_id(
+                        mongo.clone(),
+                        judge_result.user_id,
+                        judge_result.question_id
+                    ).await.unwrap();    
                 }
-                return Ok(HttpResponse::InternalServerError().finish());
+                    
+                let _result=delete_job_by_id(
+                    mongo,
+                    &judge_result._id
+                ).await.unwrap();
+                
+                
+                return Ok(HttpResponse::Ok().finish());
                             
             }
         }

@@ -5,7 +5,6 @@ use bson::oid::ObjectId;
 use futures_util::TryStreamExt;
 
 use crate::utils::time::get_unix_timestamp;
-use crate::models::pass::add_pass_by_id;
 use crate::MongoDB;
 
 pub async fn add_job(
@@ -13,12 +12,14 @@ pub async fn add_job(
     object_id:&str,
     question_id:u32,
     update:u32,
+    user_id:u32,
     code:&str
 )->Result<(),()>{
     let collection=mongo.collection::<Document>("queue");
     
     let doc=doc!{
         "_id":ObjectId::parse_str(object_id).unwrap(),
+        "user_id":user_id,
         "question_id":question_id,
         "update":update,
         "submit_time":get_unix_timestamp(),
@@ -123,26 +124,6 @@ pub async fn update_judge_result(
             None
 
         ).await{
-            
-            if(is_success){
-                let result=collection.find_one(
-                    doc!{"_id":object_id},
-                    mongodb::options::FindOneOptions::builder()
-                        .projection(Some(doc!{"user_id":1,"question_id":1,"_id":0}))
-                        .build()
-                ).await;
-                
-                let result=result.unwrap().unwrap();
-                
-                let user_id=result.get_i32("user_id").unwrap() as u32;
-                let question_id=result.get_i32("question_id").unwrap() as u32;
-                
-                let _result=add_pass_by_id(mongo,user_id,question_id).await.unwrap();    
-            }
-                
-                
-
-                
             return Ok(());
         }
     }
@@ -150,6 +131,7 @@ pub async fn update_judge_result(
 }
 
 async fn check_dead_job(mongo:MongoDB){
+    println!("ok");
     let collection=mongo.clone().collection::<Document>("queue");
     
     if let Ok(mut cursor)=collection.find(
@@ -203,4 +185,6 @@ pub struct JudgeResultJson{
     pub _id:String,
     pub success:bool,
     pub test_bench:Document,
+    pub question_id:u32,
+    pub user_id:u32
 }
