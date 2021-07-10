@@ -11,7 +11,7 @@ pub async fn get_testbench(
     path: web::Path<(u32,)>
 )->Result<HttpResponse,Error>{
     
-    if let Ok(result)=get_testbench_by_id(mongo,path.into_inner().0){
+    if let Ok(result)=get_testbench_by_id(mongo,path.into_inner().0).await{
         return Ok(HttpResponse::Ok().json(result));
     }
     

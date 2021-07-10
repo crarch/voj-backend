@@ -3,7 +3,6 @@ use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 
 use actix_web::{web::Data};
 
-
 // use crate::database::get_mongo_database;
 
 use crate::routes::routing;

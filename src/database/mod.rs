@@ -18,7 +18,6 @@ use crate::env::get_env;
 // }
     
     
-use lazy_static::lazy_static;
 use mongodb::{Client, options::ClientOptions};
 
 
