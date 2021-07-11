@@ -3,6 +3,7 @@ use bson::document::Document;
 use mongodb::bson::doc;
 use bson::oid::ObjectId;
 use futures_util::TryStreamExt;
+use tokio::time::{self, Duration};
 
 use crate::utils::time::get_unix_timestamp;
 use crate::MongoDB;
@@ -131,11 +132,10 @@ pub async fn update_judge_result(
 }
 
 async fn check_dead_job(mongo:MongoDB){
-    println!("ok");
     let collection=mongo.clone().collection::<Document>("queue");
     
     if let Ok(mut cursor)=collection.find(
-        doc!{"lock_time":doc!{"$gt":get_unix_timestamp()-20}},
+        doc!{"lock_time":doc!{"$lt":get_unix_timestamp()-20}},
         mongodb::options::FindOptions::builder()
             .projection(Some(doc!{"_id":1}))
             .build()
@@ -166,18 +166,15 @@ async fn check_dead_job(mongo:MongoDB){
     
 }
 
-use std::thread;
-use std::time::Duration;
-    
 pub async fn cron(mongo:MongoDB){
-    thread::spawn(||async move{
-        loop{
-            thread::sleep(Duration::from_secs(20));
+    actix_rt::spawn(async move {
+        let mut interval = time::interval(Duration::from_secs(20));
+        loop {
+            interval.tick().await;
             check_dead_job(mongo.clone()).await;
         }
     });
-}    
-    
+}
     
 
 #[derive(Debug,Serialize,Deserialize)]
