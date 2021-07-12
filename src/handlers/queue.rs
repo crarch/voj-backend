@@ -2,12 +2,13 @@ use actix_web::{web,HttpRequest,HttpResponse,post,Error,get};
 
 use crate::MongoDB;
 
-
 use crate::models::query_first_job;
 use crate::models::delete_job_by_id;
 use crate::models::update_judge_result;
 use crate::models::queue::JudgeResultJson;
 use crate::models::pass::add_pass_by_id;
+
+use crate::Queue;
 
 
 use crate::utils::env::get_env;
@@ -16,13 +17,18 @@ use crate::utils::env::get_env;
 pub async fn get_first_job(
     mongo:MongoDB,
     req:HttpRequest,
+    queue:Queue,
 )->Result<HttpResponse,Error>{
     if let Some(authorization)=req.headers().get("Authorization"){
         if let Ok(key)=authorization.to_str(){
             if(key==get_env("JUDGER_KEY")){
-                let result=match query_first_job(mongo).await{
-                    Ok(result)=>HttpResponse::Ok().json(result),
-                    Err(_)=>HttpResponse::Ok().body(""),
+                let result=match query_first_job(mongo,queue).await{
+                    Some(job)=>{
+                        HttpResponse::Ok().json(job)
+                    },
+                    None=>{
+                        HttpResponse::Ok().body("")
+                    },
                 };
                 return Ok(result);
             }

@@ -13,34 +13,36 @@ use crate::models::query_record_by_object_id;
 use crate::models::CodeJson;
 use crate::models::UserId;
 
+use crate::Queue;
+
+use bson::oid::ObjectId;
+
 #[post("/judge")]
 pub async fn judge(
     mongo:MongoDB,
     code_json:web::Json<CodeJson>,
-    user_id:UserId
+    user_id:UserId,
+    queue:Queue,
 )->Result<HttpResponse,Error>{
     let user_id=user_id.user_id;
-    
     let question_id=code_json.question_id;
     let code=&code_json.code;
     
     if let Ok(update)=query_testbench_update_by_id(mongo.clone(),code_json.question_id).await{
-        if let Ok(result)=create_new_record(mongo.clone(),user_id,question_id,code).await{
-            let object_id=result.get_str("$oid").unwrap();
-            
-            add_job(
-                mongo,
-                object_id,
-                question_id,
-                update,
-                user_id,
-                code
-            ).await.unwrap();
-            
+    
+        if let Ok(object_id)=add_job(
+            mongo,
+            queue,
+            question_id,
+            update,
+            user_id,
+            code
+        ).await{
+
             let result=doc!{
-                "_id":result
+                "_id":object_id
             };
-            
+    
             return Ok(HttpResponse::Ok().json(result));
         }
     }

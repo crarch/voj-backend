@@ -7,7 +7,7 @@ use futures_util::TryStreamExt;
 use crate::utils::time::get_unix_timestamp;
 use crate::MongoDB;
 
-pub async fn create_new_record(mongo:MongoDB,user_id:u32,question_id:u32,code:&str)->Result<Document,()>{
+pub async fn create_new_record(mongo:MongoDB,user_id:u32,question_id:u32,code:&str)->Result<ObjectId,()>{
     
     let collection=mongo.collection::<Document>("records");
     
@@ -22,16 +22,7 @@ pub async fn create_new_record(mongo:MongoDB,user_id:u32,question_id:u32,code:&s
     
     match result{
         Ok(insert_result)=>{
-            let object_id=insert_result.inserted_id
-                .as_object_id()
-                .unwrap()
-                .to_hex();
-            
-            let result=doc!{
-                "$oid":object_id,
-            };
-            
-            Ok(result)
+            Ok(insert_result.inserted_id.as_object_id().unwrap())
         },
         Err(_)=>Err(()),
     }

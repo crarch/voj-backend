@@ -10,6 +10,12 @@ use crate::models::cron;
 use crate::middleware;
 use crate::database::get_db;
 
+use std::sync::Mutex;
+
+use bson::oid::ObjectId;
+pub type Queue=Data<Mutex<VecDeque<ObjectId>>>;
+use std::collections::VecDeque;
+
 pub async fn server()->std::io::Result<()>{
     
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
@@ -26,6 +32,8 @@ pub async fn server()->std::io::Result<()>{
     builder.set_certificate_chain_file(&ssl_cert).unwrap();
         
     let mongo=get_db().await;
+    
+    let queue:Queue=Data::new(Mutex::new(VecDeque::new()));
 
         
     cron(Data::new(mongo.clone())).await;
@@ -35,6 +43,7 @@ pub async fn server()->std::io::Result<()>{
             .wrap(middleware::Auth)
             .configure(routing)
             .app_data(Data::new(mongo.clone()))
+            .app_data(queue.clone())
             .wrap(Logger::default())
     })
         .keep_alive(75)

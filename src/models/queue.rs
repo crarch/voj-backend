@@ -10,52 +10,76 @@ use crate::MongoDB;
 
 pub async fn add_job(
     mongo:MongoDB,
-    object_id:&str,
+    queue:Queue,
     question_id:u32,
     update:u32,
     user_id:u32,
     code:&str
-)->Result<(),()>{
+)->Result<ObjectId,()>{
     let collection=mongo.collection::<Document>("queue");
     
-    let doc=doc!{
-        "_id":ObjectId::parse_str(object_id).unwrap(),
-        "user_id":user_id,
-        "question_id":question_id,
-        "update":update,
-        "submit_time":get_unix_timestamp(),
-        "code":code,
-    };
-    
-    let result=collection.insert_one(doc,None).await;
-    
-    match result{
-        Ok(_)=>{
-            Ok(())
-        },
-        Err(_)=>Err(()),
+    if let Ok(object_id)=create_new_record(mongo.clone(),user_id,question_id,code).await{
+        //lock queue
+        
+        let mut queue=queue.lock().unwrap();    
+            
+        queue.push_back(object_id);
+        //unlock queue
+        std::mem::drop(queue);
+        
+        let doc=doc!{
+            "_id":object_id,
+            "user_id":user_id,
+            "question_id":question_id,
+            "update":update,
+            "submit_time":get_unix_timestamp(),
+            "code":code,
+        };
+        
+        let insert_result=collection.insert_one(doc,None).await;
+        
+        let result=match insert_result{
+            Ok(_)=>{
+                Ok(object_id)
+            },
+            Err(_)=>Err(()),
+        };
+        
+        return result;
     }
+    
+    Err(())
 }
+
+use crate::Queue;
+use crate::models::create_new_record;
 
 pub async fn query_first_job(
     mongo:MongoDB,
-)->Result<Document,()>{
+    queue:Queue
+)->Option<Document>{
     let collection=mongo.collection::<Document>("queue");
 
-    if let Ok(cursor)=collection.find_one(
-        doc!{"lock_time":doc!{"$exists":false}},
-        None
-    ).await{
-        if let Some(result)=cursor{
-            if let Ok(object_id)=result.get_object_id("_id"){
-                if let Ok(_)=lock_job_by_id(mongo,object_id).await{
-                    return Ok(result);
+    if let Ok(mut queue)=queue.lock(){
+        
+        let head=queue.pop_front();
+        std::mem::drop(queue);
+        
+        if let Some(object_id)=head{
+            if let Ok(_)=lock_job_by_id(mongo,object_id).await{
+                if let Ok(cursor)=collection.find_one(
+                    doc!{"_id":object_id},
+                    None
+                ).await{
+                    if let Some(result)=cursor{
+                        return Some(result);
+                    }
                 }
             }
         }
     }
         
-    Err(())
+    None
     
 }
 

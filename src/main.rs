@@ -11,6 +11,8 @@ mod middleware;
 use crate::database::MongoDB;
 use crate::utils::env;
 
+use crate::server::Queue;
+
 
 #[actix_web::main]
 async fn main()->std::io::Result<()>{
