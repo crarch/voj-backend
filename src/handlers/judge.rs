@@ -4,7 +4,6 @@ use mongodb::bson::doc;
 use crate::MongoDB;
 
 use crate::models::query_testbench_update_by_id;
-use crate::models::create_new_record;
 use crate::models::add_job;
 use crate::models::query_record_list_by_page;
 use crate::models::query_record_list_by_page_and_question;
@@ -58,8 +57,10 @@ pub async fn get_record(
     user_id:UserId
 )->Result<HttpResponse,Error>{
     
-    if let Ok(result)=query_record_by_object_id(mongo,&path.into_inner().0,user_id.user_id).await{
-        return Ok(HttpResponse::Ok().json(result));
+    if let Ok(object_id)=ObjectId::parse_str(&path.into_inner().0){
+        if let Ok(result)=query_record_by_object_id(mongo,object_id,user_id.user_id).await{
+            return Ok(HttpResponse::Ok().json(result));
+        }
     }
     
     Ok(HttpResponse::NotFound().finish())

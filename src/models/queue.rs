@@ -113,44 +113,40 @@ async fn lock_job_by_id(
 
 pub async fn delete_job_by_id(
     mongo:MongoDB,
-    object_id:&str,
+    object_id:ObjectId,
 )->Result<(),()>{
     
     let collection=mongo.collection::<Document>("queue");
     
-    if let Ok(object_id)=ObjectId::parse_str(object_id){
-        if let Ok(_result)=collection.delete_one(
-            doc!{"_id":object_id},
-            None
-        ).await{
-            return Ok(());
-        }
+    if let Ok(_result)=collection.delete_one(
+        doc!{"_id":object_id},
+        None
+    ).await{
+        return Ok(());
     }
     Err(())
 }
 
 pub async fn update_judge_result(
     mongo:MongoDB,
-    object_id:&str,
+    object_id:ObjectId,
     is_success:bool,
     test_bench:&Document,
 )->Result<(),()>{
     let collection=mongo.collection::<Document>("records");
     
-    if let Ok(object_id)=ObjectId::parse_str(object_id){
-        if let Ok(_result)=collection.update_one(
-            doc!{"_id":object_id,"success":doc!{"$exists":false}},
-            doc!{
-                "$set":{
-                    "success":is_success,
-                    "test_bench":test_bench
-                }
-            },
-            None
+    if let Ok(_result)=collection.update_one(
+        doc!{"_id":object_id,"success":doc!{"$exists":false}},
+        doc!{
+            "$set":{
+                "success":is_success,
+                "test_bench":test_bench
+            }
+        },
+        None
 
-        ).await{
-            return Ok(());
-        }
+    ).await{
+        return Ok(());
     }
     Err(())
 }
@@ -170,18 +166,17 @@ async fn check_dead_job(mongo:MongoDB){
                     "time_out":"timeout",
                 };
                 
-                let object_id=object_id.to_hex();
                 
                 let _=update_judge_result(
                     mongo.clone(),
-                    &object_id,
+                    object_id.clone(),
                     false,
                     &time_out
                 ).await.unwrap();
                 
                 let _=delete_job_by_id(
                     mongo.clone(),
-                    &object_id,
+                    object_id,
                 ).await.unwrap();
                 
             }
@@ -203,7 +198,7 @@ pub async fn cron(mongo:MongoDB){
 
 #[derive(Debug,Serialize,Deserialize)]
 pub struct JudgeResultJson{
-    pub _id:String,
+    pub _id:ObjectId,
     pub success:bool,
     pub test_bench:Document,
     pub question_id:u32,

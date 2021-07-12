@@ -53,7 +53,7 @@ pub async fn return_judge_result(
             if(key==get_env("JUDGER_KEY")){
                 let _result=update_judge_result(
                     mongo.clone(),
-                    &judge_result._id,
+                    judge_result._id.clone(),
                     judge_result.success,
                     &judge_result.test_bench
                 ).await.unwrap();
@@ -68,7 +68,7 @@ pub async fn return_judge_result(
                     
                 let _result=delete_job_by_id(
                     mongo,
-                    &judge_result._id
+                    judge_result._id
                 ).await.unwrap();
                 
                 

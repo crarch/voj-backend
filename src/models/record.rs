@@ -34,20 +34,18 @@ pub async fn create_new_record(mongo:MongoDB,user_id:u32,question_id:u32,code:&s
 
 
 //only owner can access record
-pub async fn query_record_by_object_id(mongo:MongoDB,object_id:&str,user_id:u32)->Result<Document,()>{
+pub async fn query_record_by_object_id(mongo:MongoDB,object_id:ObjectId,user_id:u32)->Result<Document,()>{
     
     let collection=mongo.collection::<Document>("records");
     
-    if let Ok(object_id)=ObjectId::parse_str(object_id){
-        if let Ok(result)=collection.find_one(
-            doc!{"_id":object_id,"user_id":user_id},
-            None
-        ).await{
-            if let Some(result)=result{
-                return Ok(result);
-            }
+    if let Ok(result)=collection.find_one(
+        doc!{"_id":object_id,"user_id":user_id},
+        None
+    ).await{
+        if let Some(result)=result{
+            return Ok(result);
         }
-    }    
+    }
     
     Err(())
 }
