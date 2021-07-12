@@ -185,6 +185,26 @@ async fn check_dead_job(mongo:MongoDB){
     
 }
 
+pub async fn reload_job(mongo:MongoDB,queue:&Queue){
+    let collection=mongo.clone().collection::<Document>("queue");
+    
+    if let Ok(mut cursor)=collection.find(
+        doc!{"lock_time":doc!{"$exists":false}},
+        mongodb::options::FindOptions::builder()
+            .projection(Some(doc!{"_id":1}))
+            .build()
+    ).await{
+        if let Ok(mut queue)=queue.lock(){
+            while let Some(doc)=cursor.try_next().await.unwrap(){
+                if let Ok(object_id)=doc.get_object_id("_id"){
+                    queue.push_back(object_id);
+                }
+            }
+        }
+    }
+    
+}
+
 pub async fn cron(mongo:MongoDB){
     actix_rt::spawn(async move {
         let mut interval = time::interval(Duration::from_secs(20));

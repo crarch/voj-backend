@@ -9,6 +9,7 @@ use crate::models::cron;
 
 use crate::middleware;
 use crate::database::get_db;
+use crate::models::reload_job;
 
 use std::sync::Mutex;
 
@@ -36,7 +37,8 @@ pub async fn server()->std::io::Result<()>{
     let mongo=get_db().await;
     
     let queue:Queue=Data::new(Mutex::new(VecDeque::new()));
-
+    
+    reload_job(Data::new(mongo.clone()),&queue).await;
         
     cron(Data::new(mongo.clone())).await;
     
