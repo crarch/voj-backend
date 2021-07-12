@@ -1,7 +1,7 @@
 use actix_web::{App,HttpServer};
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 
-use actix_web::{web::Data};
+use actix_web::{http,web::Data};
 
 use crate::routes::routing;
 use crate::env::get_env;
@@ -15,6 +15,8 @@ use std::sync::Mutex;
 use bson::oid::ObjectId;
 pub type Queue=Data<Mutex<VecDeque<ObjectId>>>;
 use std::collections::VecDeque;
+
+use actix_cors::Cors;
 
 pub async fn server()->std::io::Result<()>{
     
@@ -39,7 +41,17 @@ pub async fn server()->std::io::Result<()>{
     cron(Data::new(mongo.clone())).await;
     
     HttpServer::new(move||{
+        let cors_origin=get_env("CORS_ORIGIN");
+        
+        let cors = Cors::default()
+              .allowed_origin(&cors_origin)
+              .allowed_methods(vec!["GET", "POST"])
+              .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
+              .allowed_header(http::header::CONTENT_TYPE)
+              .max_age(3600);
+        
         App::new()
+            .wrap(cors)
             .wrap(middleware::Auth)
             .configure(routing)
             .app_data(Data::new(mongo.clone()))
