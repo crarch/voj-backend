@@ -53,8 +53,8 @@ pub async fn server()->std::io::Result<()>{
               .max_age(3600);
         
         App::new()
-            .wrap(cors)
             .wrap(middleware::Auth)
+            .wrap(cors)
             .configure(routing)
             .app_data(Data::new(mongo.clone()))
             .app_data(queue.clone())
