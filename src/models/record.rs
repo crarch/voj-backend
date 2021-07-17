@@ -30,6 +30,24 @@ pub async fn create_new_record(mongo:MongoDB,user_id:u32,question_id:u32,code:&s
 }
 
 
+pub async fn query_record_paging(mongo:MongoDB,user_id:u32)->Result<Document,()>{
+    
+    let collection=mongo.collection::<Document>("records");
+    
+    if let Ok(result)=collection.count_documents(
+        doc!{"user_id":user_id},
+        None
+    ).await{
+        let result=doc!{
+            "default_page_size":20u32,
+            "total_records":result
+        };
+        return Ok(result);
+    }
+    
+    Err(())
+    
+}
 
 
 

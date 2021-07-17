@@ -8,6 +8,7 @@ use crate::models::add_job;
 use crate::models::query_record_list_by_page;
 use crate::models::query_record_list_by_page_and_question;
 use crate::models::query_record_by_object_id;
+use crate::models::query_record_paging;
 
 use crate::models::CodeJson;
 use crate::models::UserId;
@@ -74,6 +75,19 @@ pub async fn get_record_list(
 )->Result<HttpResponse,Error>{
 
     if let Ok(result)=query_record_list_by_page(mongo,path.into_inner().0,user_id.user_id).await{
+        return Ok(HttpResponse::Ok().json(result));
+    }
+
+    Ok(HttpResponse::NotFound().finish())
+}
+
+#[get("/judge/record/page")]
+pub async fn get_record_paging(
+    mongo:MongoDB,
+    user_id:UserId
+)->Result<HttpResponse,Error>{
+
+    if let Ok(result)=query_record_paging(mongo,user_id.user_id).await{
         return Ok(HttpResponse::Ok().json(result));
     }
 
