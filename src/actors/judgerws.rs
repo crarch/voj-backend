@@ -1,15 +1,10 @@
-
 use actix::{Actor,StreamHandler};
-
 use actix_web_actors::ws;
 use std::time::{Instant};
 use actix::{fut,WrapFuture,ActorFutureExt,ContextFutureSpawner};
 use uuid::Uuid;
-
 use actix::Addr;
-
-
-use actix::prelude::{Context, Handler, Recipient,Message};
+use actix::prelude::{Handler, Recipient};
 use actix::{AsyncContext};
 
 use super::WsMessage;
