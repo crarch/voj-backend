@@ -31,6 +31,5 @@ pub async fn push_job(
     queue:Data<Addr<Queue>>,
     job:String
 ){
-    println!("ok");
     queue.do_send(WsJob(job));
 }

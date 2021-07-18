@@ -18,3 +18,9 @@ pub struct WsJob(pub String);
 #[derive(Message)]
 #[rtype(result="()")]
 pub struct WsJudgeResult(pub String);
+
+#[derive(Message)]
+#[rtype(result = "()")]
+pub struct Disconnect {
+    pub id: Uuid,
+}

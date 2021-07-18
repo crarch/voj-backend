@@ -1,17 +1,18 @@
-use actix::{Actor,StreamHandler};
+use actix::{Actor,StreamHandler,ActorContext,Running};
 use actix_web_actors::ws;
-use std::time::{Instant};
 use actix::{fut,WrapFuture,ActorFutureExt,ContextFutureSpawner};
 use uuid::Uuid;
 use actix::Addr;
 use actix::prelude::{Handler, Recipient};
 use actix::{AsyncContext};
+use std::time::{Duration, Instant};
 
 use super::WsJob;
 use super::WsJudgeResult;
 use super::Connect;
 use super::Judgers;
 use super::Queue;
+use super::Disconnect;
 
 type Socket=Recipient<WsJob>;
 
@@ -19,6 +20,7 @@ impl Actor for JudgerWs{
     type Context=ws::WebsocketContext<Self>;
     
     fn started(&mut self, ctx: &mut Self::Context) {
+        self.hb(ctx);
     
         let addr = ctx.address(); 
         self.queue_addr
@@ -36,10 +38,15 @@ impl Actor for JudgerWs{
             })
             .wait(ctx);
     }
+    
+    fn stopping(&mut self, _: &mut Self::Context) -> Running {
+        self.queue_addr.do_send(Disconnect { id: self.id });
+        Running::Stop
+    }
 }
 
 pub struct JudgerWs {
-    hb: Instant,
+    hb:Instant,
     id:Uuid,
     queue_addr:Addr<Queue>,
 }
@@ -54,7 +61,27 @@ impl JudgerWs{
             queue_addr:queue_addr
         }
     }
+    
 }
+
+const HEARTBEAT_INTERVAL: Duration = Duration::from_secs(5);
+const CLIENT_TIMEOUT: Duration = Duration::from_secs(10);
+
+impl JudgerWs{
+    fn hb(&self, ctx: &mut ws::WebsocketContext<Self>) {
+        ctx.run_interval(HEARTBEAT_INTERVAL, |act, ctx| {
+            if Instant::now().duration_since(act.hb) > CLIENT_TIMEOUT {
+                println!("Disconnecting failed heartbeat");
+                act.queue_addr.do_send(Disconnect { id: act.id });
+                ctx.stop();
+                return;
+            }
+
+            ctx.ping(b"hi");
+        });
+    }
+}
+
 
 impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for JudgerWs {
     fn handle(
@@ -63,8 +90,19 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for JudgerWs {
         ctx: &mut Self::Context,
     ) {
         match msg {
-            Ok(ws::Message::Ping(msg)) => ctx.pong(&msg),
+            Ok(ws::Message::Ping(msg)) => {
+                self.hb = Instant::now();
+                ctx.pong(&msg);
+            },
+            Ok(ws::Message::Pong(_)) => {
+                self.hb = Instant::now();
+            },
+            Ok(ws::Message::Close(reason)) => {
+                ctx.close(reason);
+                ctx.stop();
+            },
             Ok(ws::Message::Text(text)) =>{
+                self.hb = Instant::now();
                 //todo send to queue handle actor
                 self.queue_addr.send(WsJudgeResult(text.to_string()))
                 .into_actor(self)
@@ -77,7 +115,6 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for JudgerWs {
                 })
                 .wait(ctx);
             }, 
-            // Ok(ws::Message::Binary(bin)) => ctx.binary(bin),
             _ => (),
         }
     }

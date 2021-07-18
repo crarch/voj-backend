@@ -6,6 +6,7 @@ use super::WsJudgeResult;
 use super::Connect;
 use super::WsJob;
 use super::Judgers;
+use super::Disconnect;
 
 type Socket=Recipient<WsJob>;
 
@@ -70,17 +71,16 @@ impl Handler<Connect> for Queue{
     type Result=();
 
     fn handle(&mut self,msg:Connect,ctx:&mut Context<Self>){
-        self.judgers_addr
-            .send(msg)
-            .into_actor(self)
-            .then(|res, _, _ctx| {
-                match res {
-                    Ok(_res) => (),
-                    _ => (),
-                }
-                fut::ready(())
-            })
-            .wait(ctx);
+        self.judgers_addr.do_send(msg);
+    }
+    
+}
+
+impl Handler<Disconnect> for Queue{
+    type Result=();
+
+    fn handle(&mut self,msg:Disconnect,ctx:&mut Context<Self>){
+        self.judgers_addr.do_send(msg);
     }
     
 }
@@ -89,17 +89,7 @@ impl Handler<WsJob> for Queue{
     type Result=();
 
     fn handle(&mut self,job:WsJob,ctx:&mut Context<Self>){
-        self.judgers_addr
-            .send(job)
-            .into_actor(self)
-            .then(|res, _, _ctx| {
-                match res {
-                    Ok(_res) => (),
-                    _ => (),
-                }
-                fut::ready(())
-            })
-            .wait(ctx);
+        self.judgers_addr.do_send(job);
     }
     
 }

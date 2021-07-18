@@ -6,7 +6,7 @@ use std::collections::HashMap;
 
 use actix::prelude::{Context, Handler, Recipient};
 
-use super::{Connect,WsJob};
+use super::{Connect,WsJob,Disconnect};
 
 
 type Socket=Recipient<WsJob>;
@@ -47,10 +47,19 @@ impl Handler<Connect> for Judgers{
             msg.addr,
         );
         
-        // self.send_message(&format!("your id is {}", msg.self_id), &msg.self_id);
     }
     
 }
+
+impl Handler<Disconnect> for Judgers{
+    type Result=();
+    
+    fn handle(&mut self,msg:Disconnect,_:&mut Context<Self>){
+        self.sessions.remove(&msg.id);
+    }
+    
+}
+        
 
 impl Judgers {
     pub fn send_message_to_all(&self, message: &str) {
@@ -62,7 +71,7 @@ impl Judgers {
             let _ = socket_recipient
                 .do_send(WsJob(message.to_owned()));
         } else {
-            println!("attempting to send message but couldn't find user id.");
+            println!("no judger available");
         }
     }
 
