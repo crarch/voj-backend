@@ -19,6 +19,13 @@ use std::collections::VecDeque;
 
 use actix_cors::Cors;
 
+use crate::handlers::call_back;
+
+
+use crate::handlers::Judgers;
+use actix::Actor;
+use env_logger::Env;
+
 pub async fn server()->std::io::Result<()>{
     
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
@@ -42,6 +49,10 @@ pub async fn server()->std::io::Result<()>{
         
     cron(Data::new(mongo.clone())).await;
     
+    let judgers=Judgers::default().start();
+    
+    // call_back(judgers.clone()).await;
+    
     HttpServer::new(move||{
         let cors_origin=get_env("CORS_ORIGIN");
         
@@ -58,10 +69,12 @@ pub async fn server()->std::io::Result<()>{
             .configure(routing)
             .app_data(Data::new(mongo.clone()))
             .app_data(queue.clone())
+            .app_data(Data::new(judgers.clone()))
             .wrap(Logger::default())
     })
         .keep_alive(75)
         .bind_openssl(&listen,builder)?
+        // .bind("0.0.0.0:8080")?
         .run()
         .await
 }

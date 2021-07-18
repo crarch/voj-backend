@@ -10,8 +10,11 @@ use crate::handlers::testbench::*;
 use crate::handlers::judge::*;
 use crate::handlers::queue::*;
 
+use crate::handlers::get_websocket;
+
 pub fn routing(cfg:&mut web::ServiceConfig){
     cfg
+        .service(get_websocket)
         .service(get_record_list_by_question)
         .service(get_record_paging)
         .service(get_testbench)

@@ -15,6 +15,8 @@ use crate::models::UserId;
 
 use crate::Queue;
 
+use crate::handlers::{Data,Addr,Judgers,call_back};
+
 use bson::oid::ObjectId;
 
 #[post("/judge")]
@@ -23,6 +25,7 @@ pub async fn judge(
     code_json:web::Json<CodeJson>,
     user_id:UserId,
     queue:Queue,
+    srv:Data<Addr<Judgers>>
 )->Result<HttpResponse,Error>{
     let user_id=user_id.user_id;
     let question_id=code_json.question_id;
@@ -42,6 +45,8 @@ pub async fn judge(
             let result=doc!{
                 "_id":object_id
             };
+            
+            call_back(srv).await;
     
             return Ok(HttpResponse::Ok().json(result));
         }
