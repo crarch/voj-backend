@@ -1,29 +1,21 @@
 use actix_web::{App,HttpServer};
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
-
 use actix_web::{http,web::Data};
+use actix::Addr;
 
 use crate::routes::routing;
 use crate::env::get_env;
-use crate::models::cron;
-
 use crate::middleware;
 use crate::database::get_db;
-use crate::models::reload_job;
 
 use std::sync::Mutex;
-
 use bson::oid::ObjectId;
-pub type Queue=Data<Mutex<VecDeque<ObjectId>>>;
 use std::collections::VecDeque;
-
 use actix_cors::Cors;
-
-
 use actix::Actor;
-
-// use env_logger::Logger;
 use actix_web::middleware::Logger;
+
+pub type Queue=Data<Addr<crate::actors::Queue>>;
 
 pub async fn server()->std::io::Result<()>{
     
@@ -42,12 +34,6 @@ pub async fn server()->std::io::Result<()>{
         
     let mongo=get_db().await;
     
-    let queue:Queue=Data::new(Mutex::new(VecDeque::new()));
-    
-    reload_job(Data::new(mongo.clone()),&queue).await;
-        
-    cron(Data::new(mongo.clone())).await;
-    
     let actor_queue=crate::actors::Queue::new(mongo.clone()).start();
     
     HttpServer::new(move||{
@@ -65,7 +51,6 @@ pub async fn server()->std::io::Result<()>{
             .wrap(cors)
             .configure(routing)
             .app_data(Data::new(mongo.clone()))
-            .app_data(queue.clone())
             .app_data(Data::new(actor_queue.clone()))
             .wrap(Logger::default())
     })

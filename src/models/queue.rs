@@ -4,9 +4,14 @@ use mongodb::bson::doc;
 use bson::oid::ObjectId;
 use futures_util::TryStreamExt;
 use tokio::time::{self, Duration};
+use serde_json::Value;
+use bson::Bson;
 
 use crate::utils::time::get_unix_timestamp;
 use crate::MongoDB;
+use crate::actors::push_job;
+use crate::Queue;
+use crate::models::create_new_record;
 
 pub async fn add_job(
     mongo:MongoDB,
@@ -14,18 +19,12 @@ pub async fn add_job(
     question_id:u32,
     update:u32,
     user_id:u32,
-    code:&str
+    code:&str,
 )->Result<ObjectId,()>{
     let collection=mongo.collection::<Document>("queue");
     
     if let Ok(object_id)=create_new_record(mongo.clone(),user_id,question_id,code).await{
         //lock queue
-        
-        let mut queue=queue.lock().unwrap();    
-            
-        queue.push_back(object_id);
-        //unlock queue
-        std::mem::drop(queue);
         
         let doc=doc!{
             "_id":object_id,
@@ -35,6 +34,12 @@ pub async fn add_job(
             "submit_time":get_unix_timestamp(),
             "code":code,
         };
+        
+        let job:Bson=Bson::from(doc.clone()).into();
+        let job:Value=job.into();
+        let job=job.to_string();
+        
+        push_job(queue,job).await;
         
         let insert_result=collection.insert_one(doc,None).await;
         
@@ -51,63 +56,7 @@ pub async fn add_job(
     Err(())
 }
 
-use crate::Queue;
-use crate::models::create_new_record;
 
-pub async fn query_first_job(
-    mongo:MongoDB,
-    queue:Queue
-)->Option<Document>{
-    let collection=mongo.collection::<Document>("queue");
-
-    if let Ok(mut queue)=queue.lock(){
-        
-        let head=queue.pop_front();
-        std::mem::drop(queue);
-        
-        if let Some(object_id)=head{
-            if let Ok(_)=lock_job_by_id(mongo,object_id).await{
-                if let Ok(cursor)=collection.find_one(
-                    doc!{"_id":object_id},
-                    None
-                ).await{
-                    if let Some(result)=cursor{
-                        return Some(result);
-                    }
-                }
-            }
-        }
-    }
-        
-    None
-    
-}
-
-async fn lock_job_by_id(
-    mongo:MongoDB,
-    object_id:ObjectId
-)->Result<(),()>{
-    let collection=mongo.collection::<Document>("queue");
-    
-    if let Ok(result)=collection.update_one(
-        doc!{"_id":object_id,"lock_time":doc!{"$exists":false}},
-        doc!{
-            "$set":{
-                "lock_time":get_unix_timestamp()
-            }
-        },
-        None
-    ).await{
-        if(result.modified_count==1){
-            return Ok(());
-        }else{
-            return Err(());
-        }
-    }
-    
-    Err(())
-    
-}
     
 
 
@@ -185,36 +134,6 @@ async fn check_dead_job(mongo:MongoDB){
     
 }
 
-pub async fn reload_job(mongo:MongoDB,queue:&Queue){
-    let collection=mongo.clone().collection::<Document>("queue");
-    
-    if let Ok(mut cursor)=collection.find(
-        doc!{"lock_time":doc!{"$exists":false}},
-        mongodb::options::FindOptions::builder()
-            .projection(Some(doc!{"_id":1}))
-            .build()
-    ).await{
-        if let Ok(mut queue)=queue.lock(){
-            while let Some(doc)=cursor.try_next().await.unwrap(){
-                if let Ok(object_id)=doc.get_object_id("_id"){
-                    queue.push_back(object_id);
-                }
-            }
-        }
-    }
-    
-}
-
-pub async fn cron(mongo:MongoDB){
-    actix_rt::spawn(async move {
-        let mut interval = time::interval(Duration::from_secs(20));
-        loop {
-            interval.tick().await;
-            check_dead_job(mongo.clone()).await;
-        }
-    });
-}
-    
 
 #[derive(Debug,Serialize,Deserialize)]
 pub struct JudgeResultJson{

@@ -19,8 +19,6 @@ pub fn routing(cfg:&mut web::ServiceConfig){
         .service(get_record_paging)
         .service(get_testbench)
         .service(get_record_list)
-        .service(return_judge_result)
-        .service(get_first_job)
         .service(get_record)
         .service(judge)
         .service(get_jwt_token)

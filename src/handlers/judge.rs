@@ -21,15 +21,13 @@ use actix_web::web::Data;
 
 use bson::oid::ObjectId;
 
-use crate::actors::push_job;
 
 #[post("/judge")]
 pub async fn judge(
     mongo:MongoDB,
     code_json:web::Json<CodeJson>,
     user_id:UserId,
-    queue:Queue,
-    queue_:Data<Addr<crate::actors::Queue>>
+    queue:Queue
 )->Result<HttpResponse,Error>{
     let user_id=user_id.user_id;
     let question_id=code_json.question_id;
@@ -50,21 +48,6 @@ pub async fn judge(
                 "_id":object_id.clone()
             };
             
-            let job=doc!{
-                "_id":object_id,
-                "user_id":user_id,
-                "question_id":question_id,
-                "update":update,
-                "submit_time":114514,
-                "code":code_json.code.clone(),
-            };
-            
-            let job:Bson=Bson::from(job).into();
-            let job:Value=job.into();
-            let job=job.to_string();
-            
-            push_job(queue_,job).await;
-    
             let result=result.to_string();
             return Ok(HttpResponse::Ok().json(result));
         }
@@ -72,8 +55,6 @@ pub async fn judge(
     
     Ok(HttpResponse::NotFound().finish())
 }
-use serde_json::Value;
-use bson::Bson;
 #[get("/judge/record/{object_id}")]
 pub async fn get_record(
     mongo:MongoDB,
