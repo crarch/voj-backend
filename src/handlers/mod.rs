@@ -15,6 +15,7 @@ use crate::actors::{Judgers,JudgerWs,Queue};
 use actix::Addr;
 
 use crate::MongoDB;
+use crate::utils::env::get_env;
 
 
 
@@ -29,13 +30,21 @@ pub async fn get_version()->Result<HttpResponse,Error>{
 pub async fn get_websocket(
     req:HttpRequest,
     stream:web::Payload,
-    // judgers:Data<Addr<Judgers>>,
     queue:Data<Addr<Queue>>,
 )->Result<HttpResponse,Error>{
-    let ws=JudgerWs::new(
-        queue.get_ref().clone(),
-    );
-    
-    let resp=ws::start(ws,&req,stream);
-    resp
+    if let Some(authorization)=req.headers().get("Authorization"){
+        if let Ok(key)=authorization.to_str(){
+            if(key==get_env("JUDGER_KEY")){
+                let ws=JudgerWs::new(
+                    queue.get_ref().clone(),
+                );
+                
+                let resp=ws::start(ws,&req,stream);
+                return resp;
+            }
+        }
+    }
+    Ok(HttpResponse::Unauthorized()
+        .finish()
+    )
 }
