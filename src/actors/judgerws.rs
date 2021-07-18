@@ -1,14 +1,14 @@
-use actix_web::{HttpResponse,Error,get};
+
 use actix::{Actor,StreamHandler};
-use actix_web::{web,App,HttpRequest,HttpServer};
+
 use actix_web_actors::ws;
-use std::time::{Duration,Instant};
+use std::time::{Instant};
 use actix::{fut,WrapFuture,ActorFutureExt,ContextFutureSpawner};
 use uuid::Uuid;
-use std::collections::HashMap;
+
 use actix::Addr;
-use tokio::time::{self};
-use actix_web::web::Data;
+
+
 use actix::prelude::{Context, Handler, Recipient,Message};
 use actix::{AsyncContext};
 
@@ -30,7 +30,7 @@ impl Actor for JudgerWs{
                 self_id: self.id,
             })
             .into_actor(self)
-            .then(|res, _, ctx| {
+            .then(|res, _, _ctx| {
                 match res {
                     Ok(_res) => (),
                     _ => (),
