@@ -1,10 +1,6 @@
-use actix::{Actor};
-use uuid::Uuid;
-use std::collections::HashMap;
 use actix::Addr;
-
 use actix_web::web::Data;
-use actix::prelude::{Context, Handler, Recipient};
+use actix::prelude::{Recipient};
 
 
 type Socket=Recipient<WsMessage>;
