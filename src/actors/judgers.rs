@@ -44,7 +44,7 @@ impl Handler<Connect> for Judgers{
             msg.addr,
         );
         
-        self.send_message(&format!("your id is {}", msg.self_id), &msg.self_id);
+        // self.send_message(&format!("your id is {}", msg.self_id), &msg.self_id);
     }
     
 }
@@ -63,4 +63,11 @@ impl Judgers {
         }
     }
 
+    // pub fn send_job_to_all(&self, job: Bson) {
+    //     self.sessions.iter().for_each(|(_,socket_recipient)| socket_recipient.do_send(WsMessage(job.to_string())).unwrap());
+    // }
 }
+
+use bson::Bson;
+use bson::document::Document;
+use super::messages::Job;

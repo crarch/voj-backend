@@ -21,13 +21,15 @@ use actix_web::web::Data;
 
 use bson::oid::ObjectId;
 
+use crate::actors::push_job;
+
 #[post("/judge")]
 pub async fn judge(
     mongo:MongoDB,
     code_json:web::Json<CodeJson>,
     user_id:UserId,
     queue:Queue,
-    srv:Data<Addr<Judgers>>
+    judgers:Data<Addr<Judgers>>
 )->Result<HttpResponse,Error>{
     let user_id=user_id.user_id;
     let question_id=code_json.question_id;
@@ -36,8 +38,8 @@ pub async fn judge(
     if let Ok(update)=query_testbench_update_by_id(mongo.clone(),code_json.question_id).await{
     
         if let Ok(object_id)=add_job(
-            mongo,
-            queue,
+            mongo.clone(),
+            queue.clone(),
             question_id,
             update,
             user_id,
@@ -48,7 +50,7 @@ pub async fn judge(
                 "_id":object_id
             };
             
-            call_back(srv).await;
+            push_job(judgers,mongo,queue).await;
     
             return Ok(HttpResponse::Ok().json(result));
         }
