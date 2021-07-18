@@ -1,6 +1,5 @@
 use uuid::Uuid;
 use actix::prelude::{Recipient,Message};
-use bson::document::Document;
 
 
 type Socket=Recipient<WsMessage>;
@@ -16,6 +15,3 @@ pub struct Connect {
 #[rtype(result="()")]
 pub struct WsMessage(pub String);
 
-#[derive(Message)]
-#[rtype(result="()")]
-pub struct Job(pub Document);

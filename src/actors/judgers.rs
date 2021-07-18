@@ -1,6 +1,9 @@
 use actix::{Actor};
 use uuid::Uuid;
 use std::collections::HashMap;
+
+
+
 use actix::prelude::{Context, Handler, Recipient};
 
 use super::{Connect,WsMessage};
@@ -63,11 +66,4 @@ impl Judgers {
         }
     }
 
-    // pub fn send_job_to_all(&self, job: Bson) {
-    //     self.sessions.iter().for_each(|(_,socket_recipient)| socket_recipient.do_send(WsMessage(job.to_string())).unwrap());
-    // }
 }
-
-use bson::Bson;
-use bson::document::Document;
-use super::messages::Job;

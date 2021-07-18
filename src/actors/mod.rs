@@ -16,7 +16,7 @@ pub use messages::*;
 use crate::{MongoDB,Queue};
 use crate::models::query_first_job;
 use bson::Bson;
-
+use serde_json::Value;
 pub async fn call_back(
     srv: Data<Addr<Judgers>>
 ){
@@ -31,6 +31,9 @@ pub async fn push_job(
     queue:Queue
 ){
     while let Some(job)=query_first_job(mongo.clone(),queue.clone()).await{
-        judgers.do_send(WsMessage(Bson::from(job).to_string()));
+        let job=Bson::from(job);
+        let job:Value=job.into();
+        let job=job.to_string();
+        judgers.do_send(WsMessage(job));
     }
 }
