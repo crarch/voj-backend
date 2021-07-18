@@ -21,7 +21,7 @@ impl Actor for JudgerWs{
     fn started(&mut self, ctx: &mut Self::Context) {
     
         let addr = ctx.address(); 
-        self.judgers_addr
+        self.queue_addr
             .send(Connect {
                 addr: addr.recipient(),
                 self_id: self.id,
@@ -42,18 +42,15 @@ pub struct JudgerWs {
     hb: Instant,
     id:Uuid,
     queue_addr:Addr<Queue>,
-    judgers_addr:Addr<Judgers>
 }
 
 impl JudgerWs{
     pub fn new(
         queue_addr:Addr<Queue>,
-        judgers_addr:Addr<Judgers>
     )->JudgerWs{
         JudgerWs{
             hb:Instant::now(),
             id:Uuid::new_v4(),
-            judgers_addr:judgers_addr,
             queue_addr:queue_addr
         }
     }
@@ -69,9 +66,18 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for JudgerWs {
             Ok(ws::Message::Ping(msg)) => ctx.pong(&msg),
             Ok(ws::Message::Text(text)) =>{
                 //todo send to queue handle actor
-                self.queue_addr.send(WsJudgeResult(text.to_string()));
+                self.queue_addr.send(WsJudgeResult(text.to_string()))
+                .into_actor(self)
+                .then(|res, _, _ctx| {
+                    match res {
+                        Ok(_res) => (),
+                        _ => (),
+                    }
+                    fut::ready(())
+                })
+                .wait(ctx);
             }, 
-            Ok(ws::Message::Binary(bin)) => ctx.binary(bin),
+            // Ok(ws::Message::Binary(bin)) => ctx.binary(bin),
             _ => (),
         }
     }

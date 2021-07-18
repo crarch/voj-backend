@@ -27,15 +27,10 @@ pub async fn call_back(
 
 
 
-// pub async fn push_job(
-//     judgers:Data<Addr<Judgers>>,
-//     mongo:MongoDB,
-//     queue:Queue
-// ){
-//     while let Some(job)=query_first_job(mongo.clone(),queue.clone()).await{
-//         let job=Bson::from(job);
-//         let job:Value=job.into();
-//         let job=job.to_string();
-//         judgers.do_send(WsJob(job));
-//     }
-// }
+pub async fn push_job(
+    queue:Data<Addr<Queue>>,
+    job:String
+){
+    println!("ok");
+    queue.do_send(WsJob(job));
+}

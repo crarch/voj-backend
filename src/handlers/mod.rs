@@ -11,21 +11,16 @@ use actix_web::web::Data;
 use anyhow::Result;
 
 use actix_web_actors::ws;
-use crate::actors::{Judgers,JudgerWs};
+use crate::actors::{Judgers,JudgerWs,Queue};
 use actix::Addr;
 
 use crate::MongoDB;
-use crate::Queue;
 
 
 
 
 #[get("/version")]
-pub async fn get_version(
-    _judgers:Data<Addr<Judgers>>,
-    _mongo:MongoDB,
-    _queue:Queue
-)->Result<HttpResponse,Error>{
+pub async fn get_version()->Result<HttpResponse,Error>{
     Ok(HttpResponse::Ok().body(format!("{{\"version\":\"{}\"}}",env::VERSION)))
 }
 
@@ -34,15 +29,13 @@ pub async fn get_version(
 pub async fn get_websocket(
     req:HttpRequest,
     stream:web::Payload,
-    judgers:Data<Addr<Judgers>>,
-    _mongo:MongoDB,
-    _queue:Queue
+    // judgers:Data<Addr<Judgers>>,
+    queue:Data<Addr<Queue>>,
 )->Result<HttpResponse,Error>{
-    // let ws=JudgerWs::new(
-    //     judgers.get_ref().clone()
-    // );
-    // 
-    // let resp=ws::start(ws,&req,stream);
-    // resp
-    panic!("");
+    let ws=JudgerWs::new(
+        queue.get_ref().clone(),
+    );
+    
+    let resp=ws::start(ws,&req,stream);
+    resp
 }

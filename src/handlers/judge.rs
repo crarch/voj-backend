@@ -21,7 +21,7 @@ use actix_web::web::Data;
 
 use bson::oid::ObjectId;
 
-// use crate::actors::push_job;
+use crate::actors::push_job;
 
 #[post("/judge")]
 pub async fn judge(
@@ -29,7 +29,7 @@ pub async fn judge(
     code_json:web::Json<CodeJson>,
     user_id:UserId,
     queue:Queue,
-    judgers:Data<Addr<Judgers>>
+    queue_:Data<Addr<crate::actors::Queue>>
 )->Result<HttpResponse,Error>{
     let user_id=user_id.user_id;
     let question_id=code_json.question_id;
@@ -47,10 +47,23 @@ pub async fn judge(
         ).await{
 
             let result=doc!{
-                "_id":object_id
+                "_id":object_id.clone()
             };
             
-            // push_job(judgers,mongo,queue).await;
+            let job=Job{
+                _id:object_id,
+                user_id:user_id,
+                question_id:question_id,
+                update:update,
+                submit_time:114514,
+                code:code_json.code
+            };
+            
+            let result=result.to_string();
+            
+            let job=job.to_string();
+            
+            push_job(queue_,job).await;
     
             return Ok(HttpResponse::Ok().json(result));
         }
@@ -59,6 +72,16 @@ pub async fn judge(
     Ok(HttpResponse::NotFound().finish())
 }
 
+use serde::{Deserialize,Serialize};
+#[derive(Debug,Serialize,Deserialize)]
+struct Job{
+    _id:ObjectId,
+    user_id:u32,
+    question_id:u32,
+    update:u32,
+    submit_time:u32,
+    code:String,
+}
 
 #[get("/judge/record/{object_id}")]
 pub async fn get_record(

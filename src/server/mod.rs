@@ -22,11 +22,13 @@ use actix_cors::Cors;
 use crate::actors::Judgers;
 use actix::Actor;
 
+// use env_logger::Logger;
 use actix_web::middleware::Logger;
 
 pub async fn server()->std::io::Result<()>{
     
-    
+    env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));    
+
     let listen:String=get_env("LISTEN_IP")+":"+&(get_env("LISTEN_PORT"));
     
     let ssl_key=get_env("SSL_KEY");
@@ -46,7 +48,7 @@ pub async fn server()->std::io::Result<()>{
         
     cron(Data::new(mongo.clone())).await;
     
-    let judgers=Judgers::default().start();
+    let actor_queue=crate::actors::Queue::new(mongo.clone()).start();
     
     HttpServer::new(move||{
         let cors_origin=get_env("CORS_ORIGIN");
@@ -64,7 +66,7 @@ pub async fn server()->std::io::Result<()>{
             .configure(routing)
             .app_data(Data::new(mongo.clone()))
             .app_data(queue.clone())
-            .app_data(Data::new(judgers.clone()))
+            .app_data(Data::new(actor_queue.clone()))
             .wrap(Logger::default())
     })
         .keep_alive(75)
