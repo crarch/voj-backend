@@ -15,7 +15,7 @@ use crate::models::UserId;
 
 use crate::Queue;
 
-use crate::actors::{Judgers,call_back};
+use crate::actors::{Judgers};
 use actix::Addr;
 use actix_web::web::Data;
 
