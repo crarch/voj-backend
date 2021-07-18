@@ -34,7 +34,6 @@ impl Queue{
         Queue{
             mongo:mongo,
             judgers_addr:Judgers::default().start(),
-            // queue:VecDeque::new()
         }
     }
     
@@ -50,17 +49,18 @@ impl Handler<WsJudgeResult> for Queue{
         let WsJudgeResult(result)=msg;
         let judge_result:JudgeResultJson=serde_json::from_str(&result).unwrap();
         
-        let runtime = tokio::runtime::Runtime::new().unwrap();
         
-        runtime.block_on(
-            update_judge_result(
+        
+        let fut=async move{
+            let result=update_judge_result(
                 self.mongo.clone(),
                 judge_result._id.clone(),
                 judge_result.success,
                 &judge_result.test_bench
-            )
-        ).unwrap();
+            ).await.unwrap();
+        };
         
+        let fut = actix::fut::wrap_future::<_, Self>(fut);
         //todo update pass
         
     }

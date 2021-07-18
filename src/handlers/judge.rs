@@ -50,39 +50,30 @@ pub async fn judge(
                 "_id":object_id.clone()
             };
             
-            let job=Job{
-                _id:object_id,
-                user_id:user_id,
-                question_id:question_id,
-                update:update,
-                submit_time:114514,
-                code:code_json.code
+            let job=doc!{
+                "_id":object_id,
+                "user_id":user_id,
+                "question_id":question_id,
+                "update":update,
+                "submit_time":114514,
+                "code":code_json.code.clone(),
             };
             
-            let result=result.to_string();
-            
+            let job:Bson=Bson::from(job).into();
+            let job:Value=job.into();
             let job=job.to_string();
             
             push_job(queue_,job).await;
     
+            let result=result.to_string();
             return Ok(HttpResponse::Ok().json(result));
         }
     }
     
     Ok(HttpResponse::NotFound().finish())
 }
-
-use serde::{Deserialize,Serialize};
-#[derive(Debug,Serialize,Deserialize)]
-struct Job{
-    _id:ObjectId,
-    user_id:u32,
-    question_id:u32,
-    update:u32,
-    submit_time:u32,
-    code:String,
-}
-
+use serde_json::Value;
+use bson::Bson;
 #[get("/judge/record/{object_id}")]
 pub async fn get_record(
     mongo:MongoDB,
