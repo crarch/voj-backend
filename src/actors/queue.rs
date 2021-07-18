@@ -1,6 +1,6 @@
 use actix::prelude::*;
-use std::time::Duration;
-use std::collections::VecDeque;
+
+
 
 use super::WsJudgeResult;
 use super::Connect;
@@ -46,14 +46,14 @@ impl Queue{
 impl Handler<WsJudgeResult> for Queue{
     type Result=();
 
-    fn handle(&mut self,msg:WsJudgeResult,ctx:&mut Context<Self>){
+    fn handle(&mut self,msg:WsJudgeResult,_ctx:&mut Context<Self>){
         let WsJudgeResult(result)=msg;
         let judge_result:JudgeResultJson=serde_json::from_str(&result).unwrap();
         
         
         
         let fut=async move{
-            let result=update_judge_result(
+            let _result=update_judge_result(
                 self.mongo.clone(),
                 judge_result._id.clone(),
                 judge_result.success,
@@ -61,7 +61,7 @@ impl Handler<WsJudgeResult> for Queue{
             ).await.unwrap();
         };
         
-        let fut = actix::fut::wrap_future::<_, Self>(fut);
+        let _fut = actix::fut::wrap_future::<_, Self>(fut);
         //todo update pass
         
     }
@@ -70,7 +70,7 @@ impl Handler<WsJudgeResult> for Queue{
 impl Handler<Connect> for Queue{
     type Result=();
 
-    fn handle(&mut self,msg:Connect,ctx:&mut Context<Self>){
+    fn handle(&mut self,msg:Connect,_ctx:&mut Context<Self>){
         self.judgers_addr.do_send(msg);
     }
     
@@ -79,7 +79,7 @@ impl Handler<Connect> for Queue{
 impl Handler<Disconnect> for Queue{
     type Result=();
 
-    fn handle(&mut self,msg:Disconnect,ctx:&mut Context<Self>){
+    fn handle(&mut self,msg:Disconnect,_ctx:&mut Context<Self>){
         self.judgers_addr.do_send(msg);
     }
     
@@ -88,7 +88,7 @@ impl Handler<Disconnect> for Queue{
 impl Handler<WsJob> for Queue{
     type Result=();
 
-    fn handle(&mut self,job:WsJob,ctx:&mut Context<Self>){
+    fn handle(&mut self,job:WsJob,_ctx:&mut Context<Self>){
         self.judgers_addr.do_send(job);
     }
     

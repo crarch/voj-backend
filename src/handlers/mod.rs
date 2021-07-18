@@ -11,10 +11,10 @@ use actix_web::web::Data;
 use anyhow::Result;
 
 use actix_web_actors::ws;
-use crate::actors::{Judgers,JudgerWs,Queue};
+use crate::actors::{JudgerWs,Queue};
 use actix::Addr;
 
-use crate::MongoDB;
+
 use crate::utils::env::get_env;
 
 

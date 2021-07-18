@@ -10,7 +10,7 @@ use std::time::{Duration, Instant};
 use super::WsJob;
 use super::WsJudgeResult;
 use super::Connect;
-use super::Judgers;
+
 use super::Queue;
 use super::Disconnect;
 
