@@ -38,10 +38,11 @@ pub async fn get_websocket(
     _mongo:MongoDB,
     _queue:Queue
 )->Result<HttpResponse,Error>{
-    let ws=JudgerWs::new(
-        judgers.get_ref().clone()
-    );
-    
-    let resp=ws::start(ws,&req,stream);
-    resp
+    // let ws=JudgerWs::new(
+    //     judgers.get_ref().clone()
+    // );
+    // 
+    // let resp=ws::start(ws,&req,stream);
+    // resp
+    panic!("");
 }

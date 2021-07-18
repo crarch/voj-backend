@@ -21,7 +21,7 @@ use actix_web::web::Data;
 
 use bson::oid::ObjectId;
 
-use crate::actors::push_job;
+// use crate::actors::push_job;
 
 #[post("/judge")]
 pub async fn judge(
@@ -50,7 +50,7 @@ pub async fn judge(
                 "_id":object_id
             };
             
-            push_job(judgers,mongo,queue).await;
+            // push_job(judgers,mongo,queue).await;
     
             return Ok(HttpResponse::Ok().json(result));
         }

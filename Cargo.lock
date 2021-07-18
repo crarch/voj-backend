@@ -2341,7 +2341,7 @@ checksum = "5fecdca9a5291cc2b8dcf7dc02453fee791a280f3743cb0905f8822ae463b3fe"
 
 [[package]]
 name = "voj_backend"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "actix",
  "actix-cors",
@@ -2350,6 +2350,7 @@ dependencies = [
  "actix-web",
  "actix-web-actors",
  "anyhow",
+ "async-trait",
  "bson",
  "chrono",
  "dotenv",

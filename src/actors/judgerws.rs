@@ -7,11 +7,13 @@ use actix::Addr;
 use actix::prelude::{Handler, Recipient};
 use actix::{AsyncContext};
 
-use super::WsMessage;
+use super::WsJob;
+use super::WsJudgeResult;
 use super::Connect;
 use super::Judgers;
+use super::Queue;
 
-type Socket=Recipient<WsMessage>;
+type Socket=Recipient<WsJob>;
 
 impl Actor for JudgerWs{
     type Context=ws::WebsocketContext<Self>;
@@ -19,7 +21,7 @@ impl Actor for JudgerWs{
     fn started(&mut self, ctx: &mut Self::Context) {
     
         let addr = ctx.address(); 
-        self.addr
+        self.judgers_addr
             .send(Connect {
                 addr: addr.recipient(),
                 self_id: self.id,
@@ -39,15 +41,20 @@ impl Actor for JudgerWs{
 pub struct JudgerWs {
     hb: Instant,
     id:Uuid,
-    addr:Addr<Judgers>
+    queue_addr:Addr<Queue>,
+    judgers_addr:Addr<Judgers>
 }
 
 impl JudgerWs{
-    pub fn new(addr:Addr<Judgers>)->JudgerWs{
+    pub fn new(
+        queue_addr:Addr<Queue>,
+        judgers_addr:Addr<Judgers>
+    )->JudgerWs{
         JudgerWs{
             hb:Instant::now(),
             id:Uuid::new_v4(),
-            addr:addr
+            judgers_addr:judgers_addr,
+            queue_addr:queue_addr
         }
     }
 }
@@ -60,17 +67,20 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for JudgerWs {
     ) {
         match msg {
             Ok(ws::Message::Ping(msg)) => ctx.pong(&msg),
-            Ok(ws::Message::Text(text)) => ctx.text(text),
+            Ok(ws::Message::Text(text)) =>{
+                //todo send to queue handle actor
+                self.queue_addr.send(WsJudgeResult(text.to_string()));
+            }, 
             Ok(ws::Message::Binary(bin)) => ctx.binary(bin),
             _ => (),
         }
     }
 }
 
-impl Handler<WsMessage> for JudgerWs {
+impl Handler<WsJob> for JudgerWs {
     type Result = ();
 
-    fn handle(&mut self, msg: WsMessage, ctx: &mut Self::Context) {
+    fn handle(&mut self, msg: WsJob, ctx: &mut Self::Context) {
         ctx.text(msg.0);
     }
 }

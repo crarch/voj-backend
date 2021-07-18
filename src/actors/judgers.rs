@@ -6,10 +6,10 @@ use std::collections::HashMap;
 
 use actix::prelude::{Context, Handler, Recipient};
 
-use super::{Connect,WsMessage};
+use super::{Connect,WsJob};
 
 
-type Socket=Recipient<WsMessage>;
+type Socket=Recipient<WsJob>;
 
 
 pub struct Judgers{
@@ -29,11 +29,11 @@ impl Actor for Judgers {
 }
 
 
-impl Handler<WsMessage> for Judgers{
+impl Handler<WsJob> for Judgers{
     type Result=();
     
-    fn handle(&mut self,msg:WsMessage,_ctx:&mut Context<Self>)->Self::Result{
-        let WsMessage(msg)=msg;
+    fn handle(&mut self,msg:WsJob,_ctx:&mut Context<Self>)->Self::Result{
+        let WsJob(msg)=msg;
         self.send_message_to_all(&msg);
     }
 }
@@ -54,13 +54,13 @@ impl Handler<Connect> for Judgers{
 
 impl Judgers {
     pub fn send_message_to_all(&self, message: &str) {
-        self.sessions.iter().for_each(|(_,socket_recipient)| socket_recipient.do_send(WsMessage(message.to_owned())).unwrap());
+        self.sessions.iter().for_each(|(_,socket_recipient)| socket_recipient.do_send(WsJob(message.to_owned())).unwrap());
     }
     
     fn send_message(&self, message: &str, id_to: &Uuid) {
         if let Some(socket_recipient) = self.sessions.get(id_to) {
             let _ = socket_recipient
-                .do_send(WsMessage(message.to_owned()));
+                .do_send(WsJob(message.to_owned()));
         } else {
             println!("attempting to send message but couldn't find user id.");
         }
