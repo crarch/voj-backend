@@ -15,7 +15,9 @@ use crate::models::UserId;
 
 use crate::Queue;
 
-use crate::handlers::{Data,Addr,Judgers,call_back};
+use crate::actors::{Judgers,call_back};
+use actix::Addr;
+use actix_web::web::Data;
 
 use bson::oid::ObjectId;
 

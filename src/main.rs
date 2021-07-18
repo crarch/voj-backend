@@ -7,6 +7,7 @@ mod database;
 mod utils;
 mod handlers;
 mod middleware;
+mod actors;
 
 use crate::database::MongoDB;
 use crate::utils::env;

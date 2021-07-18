@@ -19,10 +19,10 @@ use std::collections::VecDeque;
 
 use actix_cors::Cors;
 
-use crate::handlers::call_back;
+use crate::actors::call_back;
 
 
-use crate::handlers::Judgers;
+use crate::actors::Judgers;
 use actix::Actor;
 use env_logger::Env;
 
