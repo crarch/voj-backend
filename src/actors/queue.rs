@@ -25,6 +25,7 @@ impl Actor for Queue{
 }
 
 impl Queue{
+    
     pub fn new(
         mongo:Database
     )->Queue{
@@ -34,9 +35,6 @@ impl Queue{
         }
     }
     
-    fn get_judgers(&self)->Addr<Judgers>{
-        self.judgers_addr.clone()
-    }
 }
 
 impl Handler<WsJudgeResult> for Queue{

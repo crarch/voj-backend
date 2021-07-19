@@ -1,13 +1,9 @@
 use actix::{Actor};
 use uuid::Uuid;
 use std::collections::HashMap;
-
-
-
 use actix::prelude::{Context, Handler, Recipient};
 
 use super::{Connect,WsJob,Disconnect};
-
 
 type Socket=Recipient<WsJob>;
 

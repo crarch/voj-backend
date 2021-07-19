@@ -1,9 +1,6 @@
 use uuid::Uuid;
 use actix::prelude::{Recipient,Message};
 
-
-type Socket=Recipient<WsJob>;
-
 #[derive(Message)]
 #[rtype(result = "()")]
 pub struct Connect {

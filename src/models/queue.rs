@@ -1,8 +1,8 @@
-use serde::{Deserialize,Serialize};
-use bson::document::Document;
+
+
 use mongodb::bson::doc;
 use bson::oid::ObjectId;
-use futures_util::TryStreamExt;
+
 
 use serde_json::Value;
 use bson::Bson;
@@ -13,7 +13,7 @@ use crate::actors::push_job;
 use crate::Queue;
 
 pub async fn add_job(
-    mongo:MongoDB,
+    _mongo:MongoDB,
     queue:Queue,
     question_id:u32,
     update:u32,
