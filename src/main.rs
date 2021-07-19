@@ -1,4 +1,4 @@
-#![allow(unused_parens,dead_code)]
+#![allow(unused_parens)]
 
 mod routes;
 mod models;

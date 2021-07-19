@@ -19,20 +19,6 @@ pub async fn query_pass_by_id(mongo:MongoDB,user_id:u32)->Result<Document,()>{
     Ok(result)
 }
 
-pub async fn add_pass_by_id(mongo:MongoDB,user_id:u32,pass:u32)->Result<(),()>{
-    let collection=mongo.collection::<Document>("users");
-    
-    let result=collection.update_one(
-        doc!{"_id":user_id},
-        doc!{"$addToSet":{"pass":pass}},
-        None,
-    ).await;
-    
-    match result{
-        Ok(_)=>Ok(()),
-        Err(_)=>Err(()),
-    }
-}
 
 #[derive(Debug,Serialize,Deserialize)]
 pub struct Pass{
