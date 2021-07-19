@@ -3,7 +3,7 @@ use actix::prelude::*;
 use super::WsJudgeResult;
 use super::Connect;
 use super::WsJob;
-use super::Judgers;
+use super::Scheduler;
 use super::Disconnect;
 
 use serde::{Deserialize,Serialize};
@@ -15,7 +15,7 @@ use mongodb::Database;
 //Actor definition
 pub struct Queue{
     mongo:Database,
-    judgers_addr:Addr<Judgers>,
+    scheduler_addr:Addr<Scheduler>,
     // queue:VecDeque
 
 }
@@ -31,7 +31,7 @@ impl Queue{
     )->Queue{
         Queue{
             mongo:mongo,
-            judgers_addr:Judgers::default().start(),
+            scheduler_addr:Scheduler::default().start(),
         }
     }
     
@@ -72,7 +72,7 @@ impl Handler<Connect> for Queue{
     type Result=();
 
     fn handle(&mut self,msg:Connect,_ctx:&mut Context<Self>){
-        self.judgers_addr.do_send(msg);
+        self.scheduler_addr.do_send(msg);
     }
     
 }
@@ -81,7 +81,7 @@ impl Handler<Disconnect> for Queue{
     type Result=();
 
     fn handle(&mut self,msg:Disconnect,_ctx:&mut Context<Self>){
-        self.judgers_addr.do_send(msg);
+        self.scheduler_addr.do_send(msg);
     }
     
 }
@@ -90,7 +90,7 @@ impl Handler<WsJob> for Queue{
     type Result=();
 
     fn handle(&mut self,job:WsJob,_ctx:&mut Context<Self>){
-        self.judgers_addr.do_send(job);
+        self.scheduler_addr.do_send(job);
     }
     
 }

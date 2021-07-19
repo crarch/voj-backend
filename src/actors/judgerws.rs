@@ -3,7 +3,7 @@ use actix_web_actors::ws;
 use actix::{fut,WrapFuture,ActorFutureExt,ContextFutureSpawner};
 use uuid::Uuid;
 use actix::Addr;
-use actix::prelude::{Handler, Recipient};
+use actix::prelude::{Handler};
 use actix::{AsyncContext};
 use std::time::{Duration, Instant};
 
@@ -14,7 +14,6 @@ use super::Connect;
 use super::Queue;
 use super::Disconnect;
 
-type Socket=Recipient<WsJob>;
 
 impl Actor for JudgerWs{
     type Context=ws::WebsocketContext<Self>;

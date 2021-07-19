@@ -4,10 +4,10 @@ use actix_web::web::Data;
 
 mod judgerws;
 mod messages;
-mod judgers;
+mod scheduler;
 mod queue;
 
-pub use judgers::*;
+pub use scheduler::*;
 pub use judgerws::*;
 pub use messages::*;
 pub use queue::*;
