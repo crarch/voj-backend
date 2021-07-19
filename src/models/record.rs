@@ -7,27 +7,6 @@ use futures_util::TryStreamExt;
 use crate::utils::time::get_unix_timestamp;
 use crate::MongoDB;
 
-pub async fn create_new_record(mongo:MongoDB,user_id:u32,question_id:u32,code:&str)->Result<ObjectId,()>{
-    
-    let collection=mongo.collection::<Document>("records");
-    
-    let doc=doc!{
-        "user_id":user_id,
-        "question_id":question_id,
-        "submit_time":get_unix_timestamp(),
-        "code":code
-    };
-    
-    let result=collection.insert_one(doc,None).await;
-    
-    match result{
-        Ok(insert_result)=>{
-            Ok(insert_result.inserted_id.as_object_id().unwrap())
-        },
-        Err(_)=>Err(()),
-    }
-    
-}
 
 
 pub async fn query_record_paging(mongo:MongoDB,user_id:u32)->Result<Document,()>{

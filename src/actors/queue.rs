@@ -1,14 +1,10 @@
 use actix::prelude::*;
 
-
-
 use super::WsJudgeResult;
 use super::Connect;
 use super::WsJob;
 use super::Judgers;
 use super::Disconnect;
-
-type Socket=Recipient<WsJob>;
 
 use serde::{Deserialize,Serialize};
 use bson::document::Document;
@@ -46,23 +42,30 @@ impl Queue{
 impl Handler<WsJudgeResult> for Queue{
     type Result=();
 
-    fn handle(&mut self,msg:WsJudgeResult,_ctx:&mut Context<Self>){
+    fn handle(&mut self,msg:WsJudgeResult,ctx:&mut Context<Self>){
         let WsJudgeResult(result)=msg;
         let judge_result:JudgeResultJson=serde_json::from_str(&result).unwrap();
-        
-        
+        let mongo=self.mongo.clone();
         
         let fut=async move{
+            if(judge_result.success){
+                
+                let _result=update_pass_by_id(
+                    mongo.clone(),
+                    judge_result.question_id,
+                    judge_result.user_id,
+                ).await.unwrap();
+                
+            }
+                
             let _result=update_judge_result(
-                self.mongo.clone(),
-                judge_result._id.clone(),
-                judge_result.success,
-                &judge_result.test_bench
+                mongo,
+                judge_result,
             ).await.unwrap();
         };
         
-        let _fut = actix::fut::wrap_future::<_, Self>(fut);
-        //todo update pass
+        let fut = actix::fut::wrap_future::<_, Self>(fut);
+        ctx.spawn(fut);
         
     }
 }
@@ -100,33 +103,66 @@ pub struct JudgeResultJson{
     pub success:bool,
     pub test_bench:Document,
     pub question_id:u32,
-    pub user_id:u32
+    pub user_id:u32,
+    pub code:String,
+    pub submit_time:u32,
 }
 
 
 async fn update_judge_result(
     mongo:Database,
-    object_id:ObjectId,
-    is_success:bool,
-    test_bench:&Document,
+    result:JudgeResultJson
 )->Result<(),()>{
     let collection=mongo.collection::<Document>("records");
     
-    println!("{:?}",test_bench);
+    let doc=doc!{
+        "_id":result._id,
+        "success":result.success,
+        "test_bench":result.test_bench,
+        "question_id":result.question_id,
+        "user_id":result.user_id,
+        "code":result.code,
+        "submit_time":result.submit_time
+    };
     
-    if let Ok(_result)=collection.update_one(
-        doc!{"_id":object_id,"success":doc!{"$exists":false}},
-        doc!{
-            "$set":{
-                "success":is_success,
-                "test_bench":test_bench
-            }
-        },
+    if let Ok(_result)=collection.insert_one(
+        doc,
         None
-
     ).await{
         return Ok(());
     }
     Err(())
 }
+
+
+async fn update_pass_by_id(
+    mongo:Database,
+    user_id:u32,
+    pass:u32
+)->Result<(),()>{
+    let collection=mongo.collection::<Document>("users");
+    
+    let result=collection.update_one(
+        doc!{"_id":user_id},
+        doc!{"$addToSet":{"pass":pass}},
+        None,
+    ).await;
+    
+    match result{
+        Ok(_)=>Ok(()),
+        Err(_)=>Err(()),
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
