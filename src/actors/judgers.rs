@@ -10,12 +10,18 @@ type Socket=Recipient<WsJob>;
 
 pub struct Judgers{
     sessions:HashMap<Uuid,Socket>,
+    judgers:Vec<(Uuid,Socket)>,
+    iter:usize,
+    judgers_count:usize
 }
 
 impl Default for Judgers{
     fn default()->Judgers{
         Judgers{
             sessions:HashMap::new(),
+            judgers:Vec::new(),
+            judgers_count:0,
+            iter:0
         }
     }
 }
@@ -28,9 +34,8 @@ impl Actor for Judgers {
 impl Handler<WsJob> for Judgers{
     type Result=();
     
-    fn handle(&mut self,msg:WsJob,_ctx:&mut Context<Self>)->Self::Result{
-        let WsJob(msg)=msg;
-        self.send_message_to_all(&msg);
+    fn handle(&mut self,job:WsJob,_ctx:&mut Context<Self>)->Self::Result{
+        self.send_job(job);
     }
 }
 
@@ -40,8 +45,14 @@ impl Handler<Connect> for Judgers{
     fn handle(&mut self,msg:Connect,_ctx:&mut Context<Self>)->Self::Result{
         self.sessions.insert(
             msg.self_id,
-            msg.addr,
+            msg.addr.clone(),
         );
+        
+        self.judgers.push(
+            (msg.self_id,msg.addr)
+        );
+        
+        self.judgers_count=self.judgers_count+1;
         
     }
     
@@ -52,6 +63,14 @@ impl Handler<Disconnect> for Judgers{
     
     fn handle(&mut self,msg:Disconnect,_:&mut Context<Self>){
         self.sessions.remove(&msg.id);
+        
+        let index = self.judgers.iter().position(|&(addr,_)| addr == msg.id).unwrap();
+        self.iter=0;
+        
+        self.judgers.remove(index);
+        
+        self.judgers_count=self.judgers_count-1;
+
     }
     
 }
@@ -70,5 +89,24 @@ impl Judgers {
             println!("no judger available");
         }
     }
+    
+    fn send_job(&mut self,job:WsJob){
+        if(self.judgers_count==0){
+            ()
+        }else{
+            if(self.iter==self.judgers_count){
+                self.iter=0;
+            }
+            
+            let (_,socket_recipient)=&self.judgers[self.iter];
+            
+            let _ = socket_recipient.do_send(job);
+            
+            self.iter=self.iter+1;
+            
+        }
+        
+    }
+        
 
 }

@@ -65,8 +65,8 @@ impl JudgerWs{
     
 }
 
-const HEARTBEAT_INTERVAL: Duration = Duration::from_secs(5);
-const CLIENT_TIMEOUT: Duration = Duration::from_secs(10);
+const HEARTBEAT_INTERVAL: Duration = Duration::from_secs(2);
+const CLIENT_TIMEOUT: Duration = Duration::from_secs(5);
 
 impl JudgerWs{
     fn hb(&self, ctx: &mut ws::WebsocketContext<Self>) {
@@ -78,7 +78,7 @@ impl JudgerWs{
                 return;
             }
                 
-            ctx.ping(b"hi");
+            ctx.ping(b"hihi");
         });
     }
 }
@@ -105,17 +105,7 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for JudgerWs {
             },
             Ok(ws::Message::Text(text)) =>{
                 self.hb = Instant::now();
-                //todo send to queue handle actor
-                self.queue_addr.send(WsJudgeResult(text.to_string()))
-                .into_actor(self)
-                .then(|res, _, _ctx| {
-                    match res {
-                        Ok(_res) => (),
-                        _ => (),
-                    }
-                    fut::ready(())
-                })
-                .wait(ctx);
+                self.queue_addr.do_send(WsJudgeResult(text.to_string()));
             }, 
             _ => (),
         }
