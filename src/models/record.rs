@@ -102,9 +102,3 @@ pub async fn query_record_list_by_page_and_question(mongo:MongoDB,question_id:u3
     
     Err(())
 }
-
-#[derive(Debug,Serialize,Deserialize)]
-pub struct CodeJson{
-    pub question_id:u32,
-    pub code:String
-}

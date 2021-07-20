@@ -1,5 +1,6 @@
 use uuid::Uuid;
 use actix::prelude::{Recipient,Message};
+use super::JudgeJob;
 
 #[derive(Message)]
 #[rtype(result = "()")]
@@ -10,7 +11,7 @@ pub struct Connect {
 
 #[derive(Message)]
 #[rtype(result="()")]
-pub struct WsJob(pub String);
+pub struct WsJob(pub JudgeJob);
 
 #[derive(Message)]
 #[rtype(result="()")]

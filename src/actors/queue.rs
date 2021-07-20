@@ -5,8 +5,8 @@ use super::Connect;
 use super::WsJob;
 use super::Scheduler;
 use super::Disconnect;
+use super::JudgeJob;
 
-use serde::{Deserialize,Serialize};
 use bson::document::Document;
 use bson::oid::ObjectId;
 use mongodb::bson::doc;
@@ -40,7 +40,7 @@ impl Handler<WsJudgeResult> for Queue{
 
     fn handle(&mut self,msg:WsJudgeResult,ctx:&mut Context<Self>){
         let WsJudgeResult(result)=msg;
-        let judge_result:JudgeResultJson=serde_json::from_str(&result).unwrap();
+        let judge_result:JudgeJob=serde_json::from_str(&result).unwrap();
         let mongo=self.mongo.clone();
         
         let fut=async move{
@@ -93,21 +93,11 @@ impl Handler<WsJob> for Queue{
     
 }
 
-#[derive(Debug,Serialize,Deserialize)]
-pub struct JudgeResultJson{
-    pub _id:ObjectId,
-    pub success:bool,
-    pub test_bench:Document,
-    pub question_id:u32,
-    pub user_id:u32,
-    pub code:String,
-    pub submit_time:u32,
-}
 
 
 async fn update_judge_result(
     mongo:Database,
-    result:JudgeResultJson
+    result:JudgeJob
 )->Result<(),()>{
     let collection=mongo.collection::<Document>("records");
     

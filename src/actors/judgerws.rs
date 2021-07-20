@@ -114,7 +114,9 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for JudgerWs {
 impl Handler<WsJob> for JudgerWs {
     type Result = ();
 
-    fn handle(&mut self, msg: WsJob, ctx: &mut Self::Context) {
-        ctx.text(msg.0);
+    fn handle(&mut self, job: WsJob, ctx: &mut Self::Context) {
+        let WsJob(job)=job;
+        let job=serde_json::to_string(&job).unwrap();
+        ctx.text(job);
     }
 }

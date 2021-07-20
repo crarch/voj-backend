@@ -1,55 +1,54 @@
 use actix_web::{web,HttpResponse,post,Error,get};
 use mongodb::bson::doc;
+use bson::oid::ObjectId;
+use serde::{Deserialize,Serialize};
+use crate::actors::JudgeJob;
 
 use crate::MongoDB;
-
+use crate::Queue;
 use crate::models::query_testbench_update_by_id;
-use crate::models::add_job;
 use crate::models::query_record_list_by_page;
 use crate::models::query_record_list_by_page_and_question;
 use crate::models::query_record_by_object_id;
 use crate::models::query_record_paging;
-
-use crate::models::CodeJson;
 use crate::models::UserId;
-
-use crate::Queue;
-
-
-
-
-
-use bson::oid::ObjectId;
+use crate::actors::push_job;
+use crate::utils::time::get_unix_timestamp;
 
 
 #[post("/judge")]
 pub async fn judge(
     mongo:MongoDB,
-    code_json:web::Json<CodeJson>,
+    mut code_json:web::Json<CodeJson>,
     user_id:UserId,
     queue:Queue
 )->Result<HttpResponse,Error>{
     let user_id=user_id.user_id;
     let question_id=code_json.question_id;
-    let code=&code_json.code;
+    let code=std::mem::take(&mut code_json.code);
     
     if let Ok(update)=query_testbench_update_by_id(mongo.clone(),code_json.question_id).await{
     
-        if let Ok(object_id)=add_job(
-            mongo.clone(),
-            queue.clone(),
-            question_id,
-            update,
-            user_id,
-            code
-        ).await{
+        let object_id=ObjectId::new();
+        
+        let job=JudgeJob{
+            _id:object_id.clone(),
+            success:false,
+            test_bench:doc!{},
+            question_id:question_id,
+            user_id:user_id,
+            code:code,
+            submit_time:get_unix_timestamp(),
+        };
+        
+        
+        push_job(queue,job).await;
 
-            let result=doc!{
-                "_id":object_id.clone()
-            };
+        let result=doc!{
+            "_id":object_id.clone()
+        };
             
-            return Ok(HttpResponse::Ok().json(result));
-        }
+        return Ok(HttpResponse::Ok().json(result));
     }
     
     Ok(HttpResponse::NotFound().finish())
@@ -116,3 +115,9 @@ pub async fn get_record_list_by_question(
     Ok(HttpResponse::NotFound().finish())
 }
 
+
+#[derive(Debug,Serialize,Deserialize)]
+pub struct CodeJson{
+    pub question_id:u32,
+    pub code:String
+}
