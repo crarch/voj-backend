@@ -48,7 +48,6 @@ pub async fn judge(
                 "_id":object_id.clone()
             };
             
-            let result=result.to_string();
             return Ok(HttpResponse::Ok().json(result));
         }
     }

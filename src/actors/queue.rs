@@ -16,8 +16,6 @@ use mongodb::Database;
 pub struct Queue{
     mongo:Database,
     scheduler_addr:Addr<Scheduler>,
-    // queue:VecDeque
-
 }
 
 impl Actor for Queue{
