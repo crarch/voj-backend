@@ -27,7 +27,7 @@ pub async fn judge(
     let question_id=code_json.question_id;
     let code=std::mem::take(&mut code_json.code);
     
-    if let Ok(update)=query_testbench_update_by_id(mongo.clone(),code_json.question_id).await{
+    if let Ok(_update)=query_testbench_update_by_id(mongo.clone(),code_json.question_id).await{
     
         let object_id=ObjectId::new();
         

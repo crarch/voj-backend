@@ -8,7 +8,7 @@ use super::Disconnect;
 use super::JudgeJob;
 
 use bson::document::Document;
-use bson::oid::ObjectId;
+
 use mongodb::bson::doc;
 use mongodb::Database;
 
