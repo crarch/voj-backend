@@ -15,7 +15,7 @@ pub struct WsJob(pub JudgeJob);
 
 #[derive(Message)]
 #[rtype(result="()")]
-pub struct WsJudgeResult(pub String);
+pub struct WsJudgeResult(pub JudgeJob);
 
 #[derive(Message)]
 #[rtype(result = "()")]

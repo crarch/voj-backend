@@ -38,9 +38,8 @@ impl Queue{
 impl Handler<WsJudgeResult> for Queue{
     type Result=();
 
-    fn handle(&mut self,msg:WsJudgeResult,ctx:&mut Context<Self>){
-        let WsJudgeResult(result)=msg;
-        let judge_result:JudgeJob=serde_json::from_str(&result).unwrap();
+    fn handle(&mut self,result:WsJudgeResult,ctx:&mut Context<Self>){
+        let WsJudgeResult(judge_result)=result;
         let mongo=self.mongo.clone();
         
         let fut=async move{

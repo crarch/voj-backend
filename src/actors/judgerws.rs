@@ -10,7 +10,7 @@ use std::time::{Duration, Instant};
 use super::WsJob;
 use super::WsJudgeResult;
 use super::Connect;
-
+use super::JudgeJob;
 use super::Queue;
 use super::Disconnect;
 
@@ -104,7 +104,8 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for JudgerWs {
             },
             Ok(ws::Message::Text(text)) =>{
                 self.hb = Instant::now();
-                self.queue_addr.do_send(WsJudgeResult(text.to_string()));
+                let judge_result:JudgeJob=serde_json::from_str(&text).unwrap();
+                self.queue_addr.do_send(WsJudgeResult(judge_result));
             }, 
             _ => (),
         }
