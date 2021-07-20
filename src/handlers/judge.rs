@@ -2,7 +2,7 @@ use actix_web::{web,HttpResponse,post,Error,get};
 use mongodb::bson::doc;
 use bson::oid::ObjectId;
 use serde::{Deserialize,Serialize};
-use crate::actors::JudgeJob;
+use crate::actors::Job;
 
 use crate::MongoDB;
 use crate::Queue;
@@ -31,7 +31,7 @@ pub async fn judge(
     
         let object_id=ObjectId::new();
         
-        let job=JudgeJob{
+        let job=Job{
             _id:object_id.clone(),
             success:false,
             test_bench:doc!{},

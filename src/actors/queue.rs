@@ -5,7 +5,7 @@ use super::Connect;
 use super::WsJob;
 use super::Scheduler;
 use super::Disconnect;
-use super::JudgeJob;
+use super::Job;
 
 use bson::document::Document;
 
@@ -96,7 +96,7 @@ impl Handler<WsJob> for Queue{
 
 async fn update_judge_result(
     mongo:Database,
-    result:JudgeJob
+    result:Job
 )->Result<(),()>{
     let collection=mongo.collection::<Document>("records");
     

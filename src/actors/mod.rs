@@ -16,13 +16,14 @@ pub use queue::*;
 
 pub async fn push_job(
     queue:Data<Addr<Queue>>,
-    job:JudgeJob
+    job:Job
 ){
+
     queue.do_send(WsJob(job));
 }
 
 #[derive(Debug,Serialize,Deserialize)]
-pub struct JudgeJob{
+pub struct Job{
     pub _id:ObjectId,
     pub success:bool,
     pub test_bench:Document,
