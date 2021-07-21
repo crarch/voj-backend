@@ -6,7 +6,6 @@ use crate::actors::Job;
 
 use crate::MongoDB;
 use crate::Queue;
-use crate::models::query_testbench_update_by_id;
 use crate::models::query_record_list_by_page;
 use crate::models::query_record_list_by_page_and_question;
 use crate::models::query_record_by_object_id;
@@ -18,7 +17,6 @@ use crate::utils::time::get_unix_timestamp;
 
 #[post("/judge")]
 pub async fn judge(
-    mongo:MongoDB,
     mut code_json:web::Json<CodeJson>,
     user_id:UserId,
     queue:Queue
