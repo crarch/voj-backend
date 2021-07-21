@@ -27,31 +27,27 @@ pub async fn judge(
     let question_id=code_json.question_id;
     let code=std::mem::take(&mut code_json.code);
     
-    if let Ok(_update)=query_testbench_update_by_id(mongo.clone(),code_json.question_id).await{
+    let object_id=ObjectId::new();
     
-        let object_id=ObjectId::new();
-        
-        let job=Job{
-            _id:object_id.clone(),
-            success:false,
-            test_bench:doc!{},
-            question_id:question_id,
-            user_id:user_id,
-            code:code,
-            submit_time:get_unix_timestamp(),
-        };
-        
-        
-        push_job(queue,job).await;
+    let job=Job{
+        _id:object_id.clone(),
+        success:false,
+        test_bench:doc!{},
+        question_id:question_id,
+        user_id:user_id,
+        code:code,
+        submit_time:get_unix_timestamp(),
+    };
+    
+    
+    push_job(queue,job).await;
 
-        let result=doc!{
-            "_id":object_id.clone()
-        };
-            
-        return Ok(HttpResponse::Ok().json(result));
-    }
+    let result=doc!{
+        "_id":object_id.clone()
+    };
     
-    Ok(HttpResponse::NotFound().finish())
+    return Ok(HttpResponse::Ok().json(result));
+    
 }
 #[get("/judge/record/{object_id}")]
 pub async fn get_record(
