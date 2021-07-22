@@ -1,6 +1,5 @@
 pub mod session;
 pub mod profile;
-pub mod testbench;
 pub mod judge;
 
 use crate::env;

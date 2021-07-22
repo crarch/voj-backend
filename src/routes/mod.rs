@@ -6,7 +6,6 @@ use crate::handlers::{
 
 use crate::handlers::session::*;
 use crate::handlers::profile::*;
-use crate::handlers::testbench::*;
 use crate::handlers::judge::*;
 
 
@@ -17,7 +16,6 @@ pub fn routing(cfg:&mut web::ServiceConfig){
         .service(get_websocket)
         .service(get_record_list_by_question)
         .service(get_record_paging)
-        .service(get_testbench)
         .service(get_record_list)
         .service(get_record)
         .service(judge)
