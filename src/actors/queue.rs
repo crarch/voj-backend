@@ -47,8 +47,8 @@ impl Handler<WsJudgeResult> for Queue{
                 
                 let _result=update_pass_by_id(
                     mongo.clone(),
-                    judge_result.question_id,
                     judge_result.user_id,
+                    judge_result.question_id,
                 ).await.unwrap();
                 
             }
@@ -132,6 +132,7 @@ async fn update_pass_by_id(
         doc!{"$addToSet":{"pass":pass}},
         None,
     ).await;
+
     
     match result{
         Ok(_)=>Ok(()),
