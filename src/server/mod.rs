@@ -40,11 +40,18 @@ pub async fn server()->std::io::Result<()>{
         let cors_origin=get_env("CORS_ORIGIN");
         
         let cors = Cors::default()
-              .allowed_origin(&cors_origin)
               .allowed_methods(vec!["GET", "POST"])
               .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
               .allowed_header(http::header::CONTENT_TYPE)
               .max_age(3600);
+              
+        let cors=
+            if(get_env("ALLOW_ANY_ORIGIN")=="true"){
+                cors.allow_any_origin()
+            }else{
+                cors.allowed_origin(&cors_origin)
+            };
+            
         
         App::new()
             .wrap(middleware::Auth)
