@@ -24,14 +24,6 @@ pub async fn server()->std::io::Result<()>{
     let listen:String=get_env("LISTEN_IP")+":"+&(get_env("LISTEN_PORT"));
     let ssl_on=get_env("SSL_ON");
     
-    let ssl_key=get_env("SSL_KEY");
-    let ssl_cert=get_env("SSL_CERT");
-    
-    let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
-    builder
-        .set_private_key_file(&ssl_key, SslFiletype::PEM)
-        .unwrap();
-    builder.set_certificate_chain_file(&ssl_cert).unwrap();
         
     let mongo=get_db().await;
     
@@ -66,7 +58,17 @@ pub async fn server()->std::io::Result<()>{
     
     let httpserver=
         if(ssl_on=="true"){
+            
+            let ssl_key=get_env("SSL_KEY");
+            let ssl_cert=get_env("SSL_CERT");
+            
+            let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
+            builder
+            .set_private_key_file(&ssl_key, SslFiletype::PEM)
+            .unwrap();
+            builder.set_certificate_chain_file(&ssl_cert).unwrap();
             httpserver.bind_openssl(&listen,builder)?
+            
         }else{
             httpserver.bind(&listen)?
         };
