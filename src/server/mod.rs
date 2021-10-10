@@ -22,6 +22,7 @@ pub async fn server()->std::io::Result<()>{
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));    
 
     let listen:String=get_env("LISTEN_IP")+":"+&(get_env("LISTEN_PORT"));
+    let ssl_on=get_env("SSL_ON");
     
     let ssl_key=get_env("SSL_KEY");
     let ssl_cert=get_env("SSL_CERT");
@@ -36,7 +37,7 @@ pub async fn server()->std::io::Result<()>{
     
     let actor_queue=crate::actors::Queue::new(mongo.clone()).start();
     
-    HttpServer::new(move||{
+    let httpserver=HttpServer::new(move||{
         let cors_origin=get_env("CORS_ORIGIN");
         
         let cors = Cors::default()
@@ -61,11 +62,16 @@ pub async fn server()->std::io::Result<()>{
             .app_data(Data::new(actor_queue.clone()))
             .wrap(Logger::default())
     })
-        .keep_alive(75)
-        .bind_openssl(&listen,builder)?
-        // .bind("0.0.0.0:8080")?
-        .run()
-        .await
+        .keep_alive(75);
+    
+    let httpserver=
+        if(ssl_on=="true"){
+            httpserver.bind_openssl(&listen,builder)?
+        }else{
+            httpserver.bind(&listen)?
+        };
+        
+    httpserver.run().await
 }
 
 
