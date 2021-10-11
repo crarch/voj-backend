@@ -22,6 +22,7 @@ pub fn routing(cfg:&mut web::ServiceConfig){
         .service(get_jwt_token)
         .service(get_pass)
         .service(refresh_jwt_token)
+        .service(get_user_profile)
         .service(get_version);
         
 }

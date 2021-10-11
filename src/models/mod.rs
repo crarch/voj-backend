@@ -6,6 +6,7 @@ pub mod record;
 pub use pass::*;
 pub use user_id::UserId;
 pub use record::*;
+pub use user::*;
 
 
 
