@@ -107,7 +107,9 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for JudgerWs {
                 let judge_result:Job=serde_json::from_str(&text).unwrap();
                 self.queue_addr.do_send(WsJudgeResult(judge_result));
             }, 
-            _ => (),
+            _ => {
+                panic!()
+            }
         }
     }
 }
