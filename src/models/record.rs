@@ -24,7 +24,7 @@ pub async fn query_record_paging(mongo:MongoDB,user_id:u32)->Result<Document,()>
         return Ok(result);
     }
     
-    Ok(doc!{})
+    Err(())
 
     
 }
@@ -45,7 +45,7 @@ pub async fn query_record_by_object_id(mongo:MongoDB,object_id:ObjectId,user_id:
         }
     }
     
-    Err(())
+    Ok(doc!{})
 }
 
 pub async fn query_record_list_by_page(mongo:MongoDB,page:u64,user_id:u32)->Result<Vec<Document>,()>{
