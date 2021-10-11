@@ -24,7 +24,7 @@ pub async fn query_record_paging(mongo:MongoDB,user_id:u32)->Result<Document,()>
         return Ok(result);
     }
     
-    Ok(HttpResponse::Ok().body(""))
+    Ok(doc!{})
 
     
 }
