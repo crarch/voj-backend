@@ -40,6 +40,7 @@ impl Actor for JudgerWs{
     }
     
     fn stopping(&mut self, _: &mut Self::Context) -> Running {
+        println!("Judger {} Disconnecting",self.id);
         self.queue_addr.do_send(Disconnect { id: self.id });
         Running::Stop
     }
@@ -71,7 +72,6 @@ impl JudgerWs{
     fn hb(&self, ctx: &mut ws::WebsocketContext<Self>) {
         ctx.run_interval(HEARTBEAT_INTERVAL, |act, ctx| {
             if Instant::now().duration_since(act.hb) > CLIENT_TIMEOUT {
-                println!("Judger {} Disconnecting failed heartbeat",&act.id);
                 act.queue_addr.do_send(Disconnect { id: act.id });
                 ctx.stop();
                 return;
@@ -100,7 +100,6 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for JudgerWs {
             Ok(ws::Message::Close(reason)) => {
                 ctx.close(reason);
                 ctx.stop();
-                println!("Judger {} Disconnecting",self.id);
             },
             Ok(ws::Message::Text(text)) =>{
                 self.hb = Instant::now();
