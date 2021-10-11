@@ -41,7 +41,7 @@ pub async fn judge(
     push_job(queue,job).await;
 
     let result=doc!{
-        "_id":object_id.clone()
+        "user_id":object_id.clone()
     };
     
     return Ok(HttpResponse::Ok().json(result));

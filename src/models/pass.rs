@@ -8,9 +8,9 @@ pub async fn query_pass_by_id(mongo:MongoDB,user_id:u32)->Result<Document,()>{
     let collection=mongo.collection::<Document>("users");
 
     let cursor=collection.find_one(
-        doc!{"_id":user_id},
+        doc!{"user_id":user_id},
         mongodb::options::FindOneOptions::builder()
-            .projection(Some(doc!{"pass":1,"_id":0}))
+            .projection(Some(doc!{"pass":1,"user_id":0}))
             .build()
     ).await.unwrap();
 

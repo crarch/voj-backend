@@ -101,7 +101,7 @@ async fn update_judge_result(
     let collection=mongo.collection::<Document>("records");
     
     let doc=doc!{
-        "_id":result._id,
+        "user_id":result._id,
         "success":result.success,
         "test_bench":result.test_bench,
         "question_id":result.question_id,
@@ -128,7 +128,7 @@ async fn update_pass_by_id(
     let collection=mongo.collection::<Document>("users");
     
     let result=collection.update_one(
-        doc!{"_id":user_id},
+        doc!{"user_id":user_id},
         doc!{"$addToSet":{"pass":pass}},
         None,
     ).await;

@@ -37,7 +37,7 @@ pub async fn query_record_by_object_id(mongo:MongoDB,object_id:ObjectId,user_id:
     let collection=mongo.collection::<Document>("records");
     
     if let Ok(result)=collection.find_one(
-        doc!{"_id":object_id,"user_id":user_id},
+        doc!{"user_id":object_id,"user_id":user_id},
         None
     ).await{
         if let Some(result)=result{
@@ -56,7 +56,7 @@ pub async fn query_record_list_by_page(mongo:MongoDB,page:u64,user_id:u32)->Resu
         doc!{"user_id":user_id},
         mongodb::options::FindOptions::builder()
             .projection(Some(doc!{
-                "_id":1,
+                "user_id":1,
                 "submit_time":1,
                 "question_id":1,
                 "success":1
@@ -84,7 +84,7 @@ pub async fn query_record_list_by_page_and_question(mongo:MongoDB,question_id:u3
         doc!{"user_id":user_id,"question_id":question_id},
         mongodb::options::FindOptions::builder()
             .projection(Some(doc!{
-                "_id":1,
+                "user_id":1,
                 "submit_time":1,
                 "question_id":1,
                 "success":1

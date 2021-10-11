@@ -29,9 +29,9 @@ pub async fn query_user_profile(
     let collection=mongo.collection::<Document>("users");
     
     let cursor=collection.find_one(
-        doc!{"_id":user_id},
+        doc!{"user_id":user_id},
         mongodb::options::FindOneOptions::builder()
-            .projection(Some(doc!{"_id":1,"user_email":1}))
+            .projection(Some(doc!{"user_id":1,"user_email":1}))
             .build()
     ).await.unwrap();
     
