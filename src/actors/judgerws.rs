@@ -6,6 +6,7 @@ use actix::Addr;
 use actix::prelude::{Handler};
 use actix::{AsyncContext};
 use std::time::{Duration, Instant};
+use log::{debug, error, log_enabled, info, Level,warn};
 
 use super::WsJob;
 use super::WsJudgeResult;
@@ -21,7 +22,7 @@ impl Actor for JudgerWs{
     fn started(&mut self, ctx: &mut Self::Context) {
         self.hb(ctx);
     
-        println!("Judger {} Connection Established",&self.id);
+        warn!("Judger {} Connection Established",&self.id);
         let addr = ctx.address(); 
         self.queue_addr
             .send(Connect {
@@ -40,7 +41,7 @@ impl Actor for JudgerWs{
     }
     
     fn stopping(&mut self, _: &mut Self::Context) -> Running {
-        println!("Judger {} Disconnecting",self.id);
+        warn!("Judger {} Disconnecting",self.id);
         self.queue_addr.do_send(Disconnect { id: self.id });
         Running::Stop
     }
