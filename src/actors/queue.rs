@@ -101,7 +101,7 @@ async fn update_judge_result(
     let collection=mongo.collection::<Document>("records");
     
     let doc=doc!{
-        "user_id":result._id,
+        "_id":result._id,
         "success":result.success,
         "test_bench":result.test_bench,
         "question_id":result.question_id,

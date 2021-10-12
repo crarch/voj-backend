@@ -37,7 +37,7 @@ pub async fn query_record_by_object_id(mongo:MongoDB,object_id:ObjectId,user_id:
     let collection=mongo.collection::<Document>("records");
     
     if let Ok(result)=collection.find_one(
-        doc!{"user_id":object_id,"user_id":user_id},
+        doc!{"_id":object_id,"user_id":user_id},
         None
     ).await{
         if let Some(result)=result{
