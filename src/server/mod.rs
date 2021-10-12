@@ -19,7 +19,7 @@ pub type Queue=Data<Addr<crate::actors::Queue>>;
 
 pub async fn server()->std::io::Result<()>{
     
-    env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));    
+    env_logger::init();
 
     let listen:String=get_env("LISTEN_IP")+":"+&(get_env("LISTEN_PORT"));
     let ssl_on=get_env("SSL_ON");
