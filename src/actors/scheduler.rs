@@ -55,12 +55,13 @@ impl Handler<Disconnect> for Scheduler{
     type Result=();
     
     fn handle(&mut self,msg:Disconnect,_:&mut Context<Self>){
-        let index = self.judgers.iter().position(|&(judger_id,_)| judger_id == msg.id).unwrap();
-        self.iter=0;
-        
-        self.judgers.remove(index);
-        
-        self.judgers_count=self.judgers_count-1;
+        if let Some(index) = self.judgers.iter().position(|&(judger_id,_)| judger_id == msg.id){
+            self.iter=0;
+            
+            self.judgers.remove(index);
+            
+            self.judgers_count=self.judgers_count-1;
+        }
 
     }
     
