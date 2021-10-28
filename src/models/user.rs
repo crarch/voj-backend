@@ -14,7 +14,7 @@ pub async fn query_user_password_by_email(
     let cursor=collection.find_one(doc!{"user_email":&user_email},None).await.unwrap();
     
     if let Some(result)=cursor{
-        return Ok((result._id,result.user_password));
+        return Ok((result.user_id,result.user_password));
     }
     
     Err(())
@@ -42,6 +42,6 @@ pub async fn query_user_profile(
 
 #[derive(Debug,Serialize,Deserialize)]
 struct UserPass{
-    _id:u32,
+    user_id:u32,
     user_password:String
 }
