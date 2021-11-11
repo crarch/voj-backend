@@ -1,8 +1,9 @@
+name: drone-test
 kind: pipeline
-name: default
+type: docker
 
 steps:
 - name: test
-  image: rust:1.55
+  image: alpine
   commands:
-  - cargo build --verbose --all
+  - echo "It worked!"
