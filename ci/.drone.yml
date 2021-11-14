@@ -4,6 +4,6 @@ name: default
 
 steps:
 - name: test
-  image: rust:1.55
+  image: rust:1.56-bullseye
   commands:
   - cargo build --verbose --all
