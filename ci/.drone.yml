@@ -7,3 +7,17 @@ steps:
   image: rust:latest
   commands:
   - cargo build --verbose --all
+
+- 
+    name: push  
+    image: plugins/docker
+    settings:
+        dockerfile: ci/Dockerfile
+        repo: phyzaitlu/voj-backend 
+        username:
+            from_secret: docker_username
+        password:
+            from_secret: docker_password
+        
+    when:
+        event: tag
