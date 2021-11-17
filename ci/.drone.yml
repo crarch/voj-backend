@@ -13,7 +13,7 @@ steps:
     image: plugins/docker
     settings:
         dockerfile: ci/Dockerfile
-        repo: phyzaitlu/voj-backend 
+        repo: hilaolu/voj-backend 
         username:
             from_secret: docker_username
         password:
